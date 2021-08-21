@@ -24,9 +24,10 @@ public class DefaultTrainerModelInput implements TrainerModelInput {
 	private final String searchLink;
 	private final Collection<TrainerModelInputAction> actions;
 
-	protected DefaultTrainerModelInput(String name, Lettering titleFont, Lettering inputFont, Lettering printFont, Lettering listFont,
-			Class<Document> documentClass, Locale locale, Pattern linkPattern, String searchLink,
-			Collection<TrainerModelInputAction> actions) {
+	protected DefaultTrainerModelInput(final String name, final Lettering titleFont, final Lettering inputFont,
+			final Lettering printFont, final Lettering listFont, final Class<Document> documentClass,
+			final Locale locale, final Pattern linkPattern, final String searchLink,
+			final Collection<TrainerModelInputAction> actions) {
 		this.name = name;
 		this.titleFont = titleFont;
 		this.inputFont = inputFont;
@@ -74,8 +75,8 @@ public class DefaultTrainerModelInput implements TrainerModelInput {
 		if (documentClass != null) {
 			try {
 				return documentClass.newInstance();
+			} catch (final Exception e) {
 			}
-			catch (Exception e) {}
 		}
 		return null;
 	}
@@ -89,15 +90,13 @@ public class DefaultTrainerModelInput implements TrainerModelInput {
 	public String getSearchUrl(String search) {
 		try {
 			search = URLEncoder.encode(search, "utf-8");
-		}
-		catch (UnsupportedEncodingException e) {
+		} catch (final UnsupportedEncodingException e) {
 			throw new RuntimeException("Your system does not support UTF-8. How is it even able to run?", e);
 		}
 		if (searchLink != null && searchLink.trim().length() > 0) {
 			return searchLink.replace(LINK_SEARCH, search);
-		} else {
-			return search;
 		}
+		return search;
 	}
 
 	@Override

@@ -5,29 +5,35 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 class BeanQuestionItem implements QuestionItem, TrainerItemListener {
-	static QuestionItem randomQuestionItem(final QuestionItemProvider provider, final Collection<BeanTrainerItem> items) {
-		List<List<Object>> possibleItems = new ArrayList<List<Object>>();
-		for (BeanTrainerItem item : items) {
+	static QuestionItem randomQuestionItem(final QuestionItemProvider provider,
+			final Collection<BeanTrainerItem> items) {
+		final List<List<Object>> possibleItems = new ArrayList<>();
+		for (final BeanTrainerItem item : items) {
 			if (item.hasUnknown()) {
-				List<Object> parts = new ArrayList<Object>();
+				final List<Object> parts = new ArrayList<>();
 				parts.add(item);
 
-				for (int i = 0; i < item.getValueCount(); ++i)
-					if (!item.isEmpty() && !item.isKnown(i))
+				for (int i = 0; i < item.getValueCount(); ++i) {
+					if (!item.isEmpty() && !item.isKnown(i)) {
 						parts.add(i);
-				if (parts.size() > 1)
+					}
+				}
+				if (parts.size() > 1) {
 					possibleItems.add(parts);
+				}
 			}
 		}
 
-		if (possibleItems.isEmpty())
+		if (possibleItems.isEmpty()) {
 			return null;
+		}
 
-		List<Object> itemParts = possibleItems.get((int) (possibleItems.size() * Math.random()));
-		int direction = (Integer) itemParts.get(1 + (int) ((itemParts.size() - 1) * Math.random()));
+		final List<Object> itemParts = possibleItems.get((int) (possibleItems.size() * Math.random()));
+		final int direction = (Integer) itemParts.get(1 + (int) ((itemParts.size() - 1) * Math.random()));
 		return new BeanQuestionItem(BeanTrainerModel.class, provider, (TrainerItem) itemParts.get(0), direction);
 	}
 
@@ -36,10 +42,10 @@ class BeanQuestionItem implements QuestionItem, TrainerItemListener {
 	private final TrainerItem item;
 	private final int direction;
 
-	private final Set<QuestionItemListener> listeners = new HashSet<QuestionItemListener>();
+	private final Set<QuestionItemListener> listeners = new HashSet<>();
 
-	private BeanQuestionItem(Class<? extends TrainerModel<?>> clazz, QuestionItemProvider provider, TrainerItem item,
-			int direction) {
+	private BeanQuestionItem(final Class<? extends TrainerModel<?>> clazz, final QuestionItemProvider provider,
+			final TrainerItem item, final int direction) {
 		this.clazz = clazz;
 		this.provider = provider;
 		this.item = item;
@@ -53,7 +59,7 @@ class BeanQuestionItem implements QuestionItem, TrainerItemListener {
 
 	@Override
 	public String[] getAnswers() {
-		List<String> out = new ArrayList<String>(Arrays.asList(item.getValues()));
+		final List<String> out = new ArrayList<>(Arrays.asList(item.getValues()));
 		out.remove(direction);
 		return out.toArray(new String[0]);
 	}
@@ -65,16 +71,17 @@ class BeanQuestionItem implements QuestionItem, TrainerItemListener {
 
 	@Override
 	public TrainerModelInput[] getAnswerInputs() {
-		List<TrainerModelInput> out = new ArrayList<TrainerModelInput>(Arrays.asList(TrainerModelProvider.getInstance()
-				.getInputs(clazz)));
+		final List<TrainerModelInput> out = new ArrayList<>(
+				Arrays.asList(TrainerModelProvider.getInstance().getInputs(clazz)));
 		out.remove(direction);
 		return out.toArray(new TrainerModelInput[0]);
 	}
 
 	@Override
-	public QuestionItem getNext(boolean known) {
-		if (item.isKnown(direction) != known)
+	public QuestionItem getNext(final boolean known) {
+		if (item.isKnown(direction) != known) {
 			item.setKnown(direction, known);
+		}
 		return provider.randomQuestionItem();
 	}
 
@@ -85,44 +92,43 @@ class BeanQuestionItem implements QuestionItem, TrainerItemListener {
 	}
 
 	@Override
-	public void removeQuestionItemListener(QuestionItemListener listener) {
+	public void removeQuestionItemListener(final QuestionItemListener listener) {
 		listeners.remove(listener);
-		if (listeners.isEmpty())
+		if (listeners.isEmpty()) {
 			item.removeTrainerItemListener(this);
+		}
 	}
 
 	@Override
-	public void trainerItemChanged(TrainerItem item) {
-		for (QuestionItemListener listener : listeners) {
+	public void trainerItemChanged(final TrainerItem item) {
+		for (final QuestionItemListener listener : listeners) {
 			listener.questionItemChanged(this);
 		}
 	}
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + direction;
-		result = prime * result + ((item == null) ? 0 : item.hashCode());
-		return result;
+		return Objects.hash(direction, item);
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
+	public boolean equals(final Object obj) {
+		if (this == obj) {
 			return true;
-		if (obj == null)
+		}
+		if (obj == null) {
 			return false;
-		if (getClass() != obj.getClass())
+		}
+		if (getClass() != obj.getClass()) {
 			return false;
-		BeanQuestionItem other = (BeanQuestionItem) obj;
-		if (direction != other.direction)
+		}
+		final BeanQuestionItem other = (BeanQuestionItem) obj;
+		if (direction != other.direction) {
 			return false;
-		if (item == null) {
-			if (other.item != null)
-				return false;
-		} else if (!item.equals(other.item))
+		}
+		if (!Objects.equals(item, other.item)) {
 			return false;
+		}
 		return true;
 	}
 }

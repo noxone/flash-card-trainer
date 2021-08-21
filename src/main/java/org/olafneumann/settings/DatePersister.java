@@ -14,20 +14,20 @@ public class DatePersister implements SettingsPersister<Date> {
 	}
 
 	@Override
-	public boolean save(Saver saver, Element xml, Type type, Date date) throws SettingsException {
+	public boolean save(final Saver saver, final Element xml, final Type type, final Date date)
+			throws SettingsException {
 		saver.setSaved(date);
-		if (date != null)
+		if (date != null) {
 			return persister.save(saver, xml, type, date.getTime());
-		else
-			return false;
+		}
+		return false;
 	}
 
 	@Override
-	public Date load(Loader loader, Element xml, Type type) throws SettingsException {
+	public Date load(final Loader loader, final Element xml, final Type type) throws SettingsException {
 		try {
 			return new Date(persister.load(loader, xml, type));
-		}
-		catch (NumberFormatException e) {
+		} catch (final NumberFormatException e) {
 			return null;
 		}
 	}

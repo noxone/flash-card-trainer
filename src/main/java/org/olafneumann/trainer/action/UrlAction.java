@@ -22,11 +22,11 @@ public class UrlAction implements TrainerModelInputAction {
 	private final String url;
 	private final ImageIcon icon;
 
-	public UrlAction(String name, Pattern[] patterns, String url, String iconName) {
+	public UrlAction(final String name, final Pattern[] patterns, final String url, final String iconName) {
 		this(name, patterns, url, Icons.valueOf(iconName));
 	}
 
-	public UrlAction(String name, Pattern[] patterns, String url, Icons icon) {
+	public UrlAction(final String name, final Pattern[] patterns, final String url, final Icons icon) {
 		this.websiteName = name;
 		this.patterns = patterns != null ? patterns : new Pattern[0];
 		this.url = url;
@@ -39,27 +39,26 @@ public class UrlAction implements TrainerModelInputAction {
 	}
 
 	@Override
-	public List<String> getTexts(String inputText) {
-		Collection<String> texts = new LinkedHashSet<String>();
-		for (Pattern pattern : patterns) {
-			Matcher matcher = pattern.matcher(inputText);
+	public List<String> getTexts(final String inputText) {
+		final Collection<String> texts = new LinkedHashSet<>();
+		for (final Pattern pattern : patterns) {
+			final Matcher matcher = pattern.matcher(inputText);
 			while (matcher.find()) {
 				for (int i = 0; i < matcher.groupCount(); ++i) {
 					texts.add(matcher.group(i + 1).trim());
 				}
 			}
 		}
-		return new ArrayList<String>(texts);
+		return new ArrayList<>(texts);
 	}
 
 	@Override
-	public void performInputAction(TrainerModelInput input, String text) {
+	public void performInputAction(final TrainerModelInput input, String text) {
 		try {
 			text = URLEncoder.encode(text, "utf-8"); //$NON-NLS-1$
-			URL url = new URL(this.url.replace("$(search)", text)); //$NON-NLS-1$
+			final URL url = new URL(this.url.replace("$(search)", text)); //$NON-NLS-1$
 			LinkRunner.open(url.toURI());
-		}
-		catch (Exception e) {
+		} catch (final Exception e) {
 			e.printStackTrace();
 		}
 	}

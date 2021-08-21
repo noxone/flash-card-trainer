@@ -38,35 +38,37 @@ public class TrainerModelProvider {
 	}
 
 	private TrainerDefaultModelProvider<?> defaultModelProvider = TrainerDefaultModelProvider.BEAN_TRAINER_MODEL_PROVIDER;
-	private final Map<Class<? extends TrainerModel<?>>, TrainerModelInput[]> inputs = new HashMap<Class<? extends TrainerModel<?>>, TrainerModelInput[]>();
+	private final Map<Class<? extends TrainerModel<?>>, TrainerModelInput[]> inputs = new HashMap<>();
 	private TypeProvider typeProvider = null;
 
-	private TrainerModelProvider() {}
+	private TrainerModelProvider() {
+	}
 
-	public void configure(Class<? extends TrainerModel<?>> modelClass, Collection<TrainerModelInput> inputs) {
+	public void configure(final Class<? extends TrainerModel<?>> modelClass,
+			final Collection<TrainerModelInput> inputs) {
 		if (inputs != null) {
-			this.inputs.put(modelClass, new ArrayList<TrainerModelInput>(inputs).toArray(new TrainerModelInput[0]));
+			this.inputs.put(modelClass, new ArrayList<>(inputs).toArray(new TrainerModelInput[0]));
 		} else {
 			this.inputs.remove(modelClass);
 		}
 	}
 
-	public TrainerModelInput[] getInputs(Class<? extends TrainerModel<?>> modelClass) {
+	public TrainerModelInput[] getInputs(final Class<? extends TrainerModel<?>> modelClass) {
 		if (inputs.containsKey(modelClass)) {
 			return inputs.get(modelClass);
-		} else {
-			return new TrainerModelInput[0];
 		}
+		return new TrainerModelInput[0];
 	}
 
 	@SuppressWarnings("unchecked")
-	public TrainerModelInput[] getInputs(TrainerModel<?> model) {
+	public TrainerModelInput[] getInputs(final TrainerModel<?> model) {
 		return getInputs((Class<? extends TrainerModel<?>>) model.getClass());
 	}
 
 	public void setTrainerDefaultModelProvider(TrainerDefaultModelProvider<?> defaultModelProvider) {
-		if (defaultModelProvider == null)
+		if (defaultModelProvider == null) {
 			defaultModelProvider = TrainerDefaultModelProvider.BEAN_TRAINER_MODEL_PROVIDER;
+		}
 		this.defaultModelProvider = defaultModelProvider;
 	}
 
@@ -78,50 +80,48 @@ public class TrainerModelProvider {
 		return typeProvider;
 	}
 
-	public void setTypeProvider(TypeProvider typeProvider) {
+	public void setTypeProvider(final TypeProvider typeProvider) {
 		this.typeProvider = typeProvider;
 	}
 
 	private static final String ZIP_XML_FILENAME = "model.xml";
 
-	public TrainerModel<?> loadModel(File file, WriteMode mode) throws IOException, ClassNotFoundException, SettingsException {
+	public TrainerModel<?> loadModel(final File file, final WriteMode mode)
+			throws IOException, ClassNotFoundException, SettingsException {
 		InputStream in = null;
 		try {
 			in = new BufferedInputStream(new FileInputStream(file));
-			if (mode != null) {
-				switch (mode) {
-				case JavaObject:
-					return loadModelFromObject(in);
-				case XML:
-					return loadModelFromXml(in);
-				case ZippedXML:
-					return loadModelFromZippedXml(in);
-				case AnnotationalSettings:
-					return loadModelFromAnnotationalSettings(in);
-				case ZippedAnnotationalSettings:
-					return loadModelFromZippedAnnotationalSettings(in);
-				case Text:
-					return loadModelFromText(in);
-				default:
-					throw new RuntimeException("Unknown write mode: " + mode.name());
-				}
-			} else {
+			if (mode == null) {
 				try {
 					return loadModelFromObject(in);
-				}
-				catch (Exception e) {
+				} catch (final Exception e) {
 					try {
 						return loadModelFromXml(in);
-					}
-					catch (Exception e1) {
+					} catch (final Exception e1) {
 						try {
 							return loadModelFromZippedXml(in);
-						}
-						catch (Exception e2) {
-							throw new RuntimeException("Unable to load model. Cannot determine filetype or file is corrupted.");
+						} catch (final Exception e2) {
+							throw new RuntimeException(
+									"Unable to load model. Cannot determine filetype or file is corrupted.");
 						}
 					}
 				}
+			}
+			switch (mode) {
+			case JavaObject:
+				return loadModelFromObject(in);
+			case XML:
+				return loadModelFromXml(in);
+			case ZippedXML:
+				return loadModelFromZippedXml(in);
+			case AnnotationalSettings:
+				return loadModelFromAnnotationalSettings(in);
+			case ZippedAnnotationalSettings:
+				return loadModelFromZippedAnnotationalSettings(in);
+			case Text:
+				return loadModelFromText(in);
+			default:
+				throw new RuntimeException("Unknown write mode: " + mode.name());
 			}
 		}
 		// catch (Exception e) {
@@ -133,21 +133,19 @@ public class TrainerModelProvider {
 			if (in != null) {
 				try {
 					in.close();
+				} catch (final IOException e) {
 				}
-				catch (IOException e) {}
 			}
 		}
 	}
 
 	@SuppressWarnings("resource")
-	private TrainerModel<?> loadModelFromXml(InputStream in) {
+	private TrainerModel<?> loadModelFromXml(final InputStream in) {
 		return (TrainerModel<?>) new XMLDecoder(in).readObject();
 	}
 
-	private TrainerModel<?> loadModelFromZippedXml(InputStream in) throws IOException {
-		ZipInputStream zin = null;
-		try {
-			zin = new ZipInputStream(in);
+	private TrainerModel<?> loadModelFromZippedXml(final InputStream in) throws IOException {
+		try (ZipInputStream zin = new ZipInputStream(in)) {
 			ZipEntry entry;
 			while ((entry = zin.getNextEntry()) != null) {
 				if (ZIP_XML_FILENAME.equals(entry.getName())) {
@@ -156,27 +154,22 @@ public class TrainerModelProvider {
 			}
 			throw new RuntimeException();
 		}
-		finally {
-			if (zin != null) {
-				zin.close();
-			}
-		}
 	}
 
-	private TrainerModel<?> loadModelFromObject(InputStream in) throws IOException, ClassNotFoundException {
+	private TrainerModel<?> loadModelFromObject(final InputStream in) throws IOException, ClassNotFoundException {
 		return (TrainerModel<?>) new ObjectInputStream(in).readObject();
 	}
 
-	private TrainerModel<?> loadModelFromAnnotationalSettings(InputStream in) throws SettingsException {
-		ModelSaver modelSaver = new ModelSaver(null);
-		AnnotationalSettings.loadSettings("trainer", new InputStreamReader(in, Charset.forName("utf-8")), modelSaver, getTypeProvider());
+	private TrainerModel<?> loadModelFromAnnotationalSettings(final InputStream in) throws SettingsException {
+		final ModelSaver modelSaver = new ModelSaver(null);
+		AnnotationalSettings.loadSettings("trainer", new InputStreamReader(in, Charset.forName("utf-8")), modelSaver,
+				getTypeProvider());
 		return modelSaver.getModel();
 	}
 
-	private TrainerModel<?> loadModelFromZippedAnnotationalSettings(InputStream in) throws IOException, SettingsException {
-		ZipInputStream zin = null;
-		try {
-			zin = new ZipInputStream(in);
+	private TrainerModel<?> loadModelFromZippedAnnotationalSettings(final InputStream in)
+			throws IOException, SettingsException {
+		try (ZipInputStream zin = new ZipInputStream(in)) {
 			ZipEntry entry;
 			while ((entry = zin.getNextEntry()) != null) {
 				if (ZIP_XML_FILENAME.equals(entry.getName())) {
@@ -185,16 +178,11 @@ public class TrainerModelProvider {
 			}
 			throw new RuntimeException();
 		}
-		finally {
-			if (zin != null) {
-				zin.close();
-			}
-		}
 	}
 
-	private TrainerModel<?> loadModelFromText(InputStream in) throws IOException {
-		BufferedReader reader = new BufferedReader(new InputStreamReader(in, Charset.forName("utf-8")));
-		BeanTrainerModel model = new BeanTrainerModel();
+	private TrainerModel<?> loadModelFromText(final InputStream in) throws IOException {
+		final BufferedReader reader = new BufferedReader(new InputStreamReader(in, Charset.forName("utf-8")));
+		final BeanTrainerModel model = new BeanTrainerModel();
 		String line;
 		while ((line = reader.readLine()) != null) {
 			model.addItem(new BeanTrainerItem(model, line.split(",")));
@@ -202,35 +190,35 @@ public class TrainerModelProvider {
 		return model;
 	}
 
-	public void saveModel(TrainerModel<?> model, File file, WriteMode mode) throws IOException, SettingsException {
+	public void saveModel(final TrainerModel<?> model, final File file, final WriteMode mode)
+			throws IOException, SettingsException {
 		FileOutputStream fos = null;
 		try {
 			fos = new FileOutputStream(file);
-			if (mode != null) {
-				switch (mode) {
-				case JavaObject:
-					writeModelAsObject(model, fos);
-					break;
-				case XML:
-					writeModelAsXml(model, fos);
-					break;
-				case ZippedXML:
-					writeModelAsZippedXml(model, fos);
-					break;
-				case AnnotationalSettings:
-					writeModelAsAnnotationalSettings(model, fos);
-					break;
-				case ZippedAnnotationalSettings:
-					writeModelAsZippedAnnotationalSettings(model, fos);
-					break;
-				case Text:
-					writeModelAsText(model, fos);
-					break;
-				default:
-					throw new RuntimeException("Unknown write mode: " + mode.name());
-				}
-			} else {
+			if (mode == null) {
 				throw new RuntimeException("No file type selected.");
+			}
+			switch (mode) {
+			case JavaObject:
+				writeModelAsObject(model, fos);
+				break;
+			case XML:
+				writeModelAsXml(model, fos);
+				break;
+			case ZippedXML:
+				writeModelAsZippedXml(model, fos);
+				break;
+			case AnnotationalSettings:
+				writeModelAsAnnotationalSettings(model, fos);
+				break;
+			case ZippedAnnotationalSettings:
+				writeModelAsZippedAnnotationalSettings(model, fos);
+				break;
+			case Text:
+				writeModelAsText(model, fos);
+				break;
+			default:
+				throw new RuntimeException("Unknown write mode: " + mode.name());
 			}
 		}
 		// catch (Exception e) {
@@ -241,78 +229,73 @@ public class TrainerModelProvider {
 			if (fos != null) {
 				try {
 					fos.close();
+				} catch (final IOException e) {
 				}
-				catch (IOException e) {}
 			}
 		}
 	}
 
-	private void writeModelAsObject(TrainerModel<?> model, OutputStream out) throws IOException {
+	private void writeModelAsObject(final TrainerModel<?> model, final OutputStream out) throws IOException {
 		ObjectOutputStream oos = null;
 		try {
 			oos = new ObjectOutputStream(new BufferedOutputStream(out));
 			oos.writeObject(model);
 			oos.flush();
-		}
-		finally {
+		} finally {
 			if (oos != null) {
 				try {
 					oos.close();
+				} catch (final IOException e) {
 				}
-				catch (IOException e) {}
 			}
 		}
 	}
 
-	private void writeModelAsZippedXml(TrainerModel<?> model, OutputStream out) throws IOException {
-		ZipOutputStream zos = new ZipOutputStream(out);
-		try {
+	private void writeModelAsZippedXml(final TrainerModel<?> model, final OutputStream out) throws IOException {
+		try (ZipOutputStream zos = new ZipOutputStream(out)) {
 			zos.putNextEntry(new ZipEntry(ZIP_XML_FILENAME));
 			writeModelAsXml(model, new FilterOutputStream(zos) {
 				@Override
-				public void close() throws IOException {}
+				public void close() throws IOException {
+				}
 			});
-		}
-		finally {
-			zos.close();
 		}
 	}
 
-	private void writeModelAsXml(TrainerModel<?> model, OutputStream out) {
+	private void writeModelAsXml(final TrainerModel<?> model, final OutputStream out) {
 		XMLEncoder enc = null;
 		try {
 			enc = new XMLEncoder(out);
 			enc.writeObject(model);
-		}
-		finally {
+		} finally {
 			if (enc != null) {
 				enc.close();
 			}
 		}
 	}
 
-	private void writeModelAsAnnotationalSettings(TrainerModel<?> model, OutputStream out) throws IOException, SettingsException {
-		AnnotationalSettings.saveSettings("trainer", new OutputStreamWriter(out, Charset.forName("utf-8")), new ModelSaver(model));
+	private void writeModelAsAnnotationalSettings(final TrainerModel<?> model, final OutputStream out)
+			throws IOException, SettingsException {
+		AnnotationalSettings.saveSettings("trainer", new OutputStreamWriter(out, Charset.forName("utf-8")),
+				new ModelSaver(model));
 	}
 
-	private void writeModelAsZippedAnnotationalSettings(TrainerModel<?> model, OutputStream out) throws IOException, SettingsException {
-		ZipOutputStream zos = new ZipOutputStream(out);
-		try {
+	private void writeModelAsZippedAnnotationalSettings(final TrainerModel<?> model, final OutputStream out)
+			throws IOException, SettingsException {
+		try (ZipOutputStream zos = new ZipOutputStream(out)) {
 			zos.putNextEntry(new ZipEntry(ZIP_XML_FILENAME));
 			writeModelAsAnnotationalSettings(model, new FilterOutputStream(zos) {
 				@Override
-				public void close() throws IOException {}
+				public void close() throws IOException {
+				}
 			});
-		}
-		finally {
-			zos.close();
 		}
 	}
 
-	private void writeModelAsText(TrainerModel<?> model, OutputStream out) throws IOException {
-		OutputStreamWriter writer = new OutputStreamWriter(out, Charset.forName("utf-8"));
-		for (TrainerItem item : model) {
-			for (String value : item.getValues()) {
+	private void writeModelAsText(final TrainerModel<?> model, final OutputStream out) throws IOException {
+		final OutputStreamWriter writer = new OutputStreamWriter(out, Charset.forName("utf-8"));
+		for (final TrainerItem item : model) {
+			for (final String value : item.getValues()) {
 				writer.append(value).append(",");
 			}
 			writer.append("\n");
@@ -323,7 +306,7 @@ public class TrainerModelProvider {
 	public static class ModelSaver {
 		private TrainerModel<?> model;
 
-		public ModelSaver(TrainerModel<?> model) {
+		public ModelSaver(final TrainerModel<?> model) {
 			this.model = model;
 		}
 
@@ -333,7 +316,7 @@ public class TrainerModelProvider {
 		}
 
 		@Setting("model")
-		public void setModel(TrainerModel<?> model) {
+		public void setModel(final TrainerModel<?> model) {
 			this.model = model;
 		}
 	}

@@ -12,6 +12,6 @@ public interface TrainerModelInputAction {
 	List<String> getTexts(String inputText);
 
 	void performInputAction(TrainerModelInput input, String text);
-	
+
 	String getActionTooltip();
 }

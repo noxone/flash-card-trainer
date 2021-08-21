@@ -2,33 +2,37 @@ package org.olafneumann.trainer.data;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import org.olafneumann.settings.Setting;
 
 public class BeanTrainerItem implements TrainerItem {
-	private List<TrainerItemListener> listeners = new ArrayList<TrainerItemListener>();
+	private final List<TrainerItemListener> listeners = new ArrayList<>();
 	private BeanTrainerModel model = null;
 
-	private List<String> values = new ArrayList<String>();
+	private List<String> values = new ArrayList<>();
 
 	public BeanTrainerItem() {
 	}
 
-	public BeanTrainerItem(BeanTrainerModel model) {
+	public BeanTrainerItem(final BeanTrainerModel model) {
 		this(model, null);
 	}
 
-	public BeanTrainerItem(BeanTrainerModel model, String[] values) {
+	public BeanTrainerItem(final BeanTrainerModel model, final String[] values) {
 		setModel(model);
-		if (values != null)
-			for (int i = 0; i < values.length; ++i)
+		if (values != null) {
+			for (int i = 0; i < values.length; ++i) {
 				this.values.set(i, values[i]);
+			}
+		}
 	}
 
 	@Override
-	public void setValue(int index, String value) {
-		if (value == null)
+	public void setValue(final int index, String value) {
+		if (value == null) {
 			value = "";
+		}
 		values.set(index, value);
 		fireItemChanged();
 	}
@@ -43,21 +47,23 @@ public class BeanTrainerItem implements TrainerItem {
 	}
 
 	@Override
-	public void setKnown(int index, boolean known) {
+	public void setKnown(final int index, final boolean known) {
 		model.setKnown(this, index, known);
 		fireItemChanged();
 	}
 
 	@Override
-	public boolean isKnown(int index) {
+	public boolean isKnown(final int index) {
 		return model.isKnown(this, index);
 	}
 
 	@Override
 	public boolean isEmpty() {
-		for (String value : values)
-			if (value != null && !value.isEmpty())
+		for (final String value : values) {
+			if (value != null && !value.isEmpty()) {
 				return false;
+			}
+		}
 		return true;
 	}
 
@@ -67,7 +73,7 @@ public class BeanTrainerItem implements TrainerItem {
 	}
 
 	@Setting("model")
-	public void setModel(BeanTrainerModel model) {
+	public void setModel(final BeanTrainerModel model) {
 		this.model = model;
 		for (int i = values.size(); i < TrainerModelProvider.getInstance().getInputs(getModel()).length; ++i) {
 			values.add("");
@@ -80,25 +86,25 @@ public class BeanTrainerItem implements TrainerItem {
 	}
 
 	@Setting("values")
-	public void setEntries(List<String> entries) {
+	public void setEntries(final List<String> entries) {
 		this.values = entries;
 	}
 
 	@Override
-	public void addTrainerItemListener(TrainerItemListener listener) {
+	public void addTrainerItemListener(final TrainerItemListener listener) {
 		listeners.add(listener);
 	}
 
 	@Override
-	public void removeTrainerItemListener(TrainerItemListener listener) {
+	public void removeTrainerItemListener(final TrainerItemListener listener) {
 		listeners.add(listener);
 	}
 
 	protected void fireItemChanged() {
-		for (TrainerItemListener listener : listeners) {
+		for (final TrainerItemListener listener : listeners) {
 			try {
 				listener.trainerItemChanged(this);
-			} catch (Exception e) {
+			} catch (final Exception e) {
 			}
 		}
 	}
@@ -126,38 +132,37 @@ public class BeanTrainerItem implements TrainerItem {
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((values == null) ? 0 : values.hashCode());
-		return result;
+		return Objects.hash(values);
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
+	public boolean equals(final Object obj) {
+		if (this == obj) {
 			return true;
-		if (obj == null)
+		}
+		if (obj == null) {
 			return false;
-		if (getClass() != obj.getClass())
+		}
+		if (getClass() != obj.getClass()) {
 			return false;
-		BeanTrainerItem other = (BeanTrainerItem) obj;
-		if (values == null) {
-			if (other.values != null)
-				return false;
-		} else if (!values.equals(other.values))
+		}
+		final BeanTrainerItem other = (BeanTrainerItem) obj;
+		if (!Objects.equals(values, other.values)) {
 			return false;
+		}
 		return true;
 	}
 
 	@Override
 	public String toString() {
-		StringBuilder sb = new StringBuilder();
-		for (String value : values) {
+		final StringBuilder sb = new StringBuilder();
+		for (final String value : values) {
 			sb.append(" / ").append(value);
 		}
 		if (!values.isEmpty()) {
-			for (int i = 0; i < 3; ++i)
+			for (int i = 0; i < 3; ++i) {
 				sb.deleteCharAt(0);
+			}
 		}
 		sb.append(" (").append(countKnown()).append("/").append(values.size()).append(")");
 		return sb.toString();

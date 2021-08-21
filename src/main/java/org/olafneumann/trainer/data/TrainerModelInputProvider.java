@@ -22,94 +22,95 @@ public class TrainerModelInputProvider {
 		throw new RuntimeException();
 	}
 
-	public static List<TrainerModelInput> readTrainerModelInputs(InputStream in) throws IOException {
-		Properties properties = new Properties();
+	public static List<TrainerModelInput> readTrainerModelInputs(final InputStream in) throws IOException {
+		final Properties properties = new Properties();
 		properties.load(in);
 		return readTrainerModelInputs(properties);
 	}
 
-	public static List<TrainerModelInput> readTrainerModelInputs(Properties properties) {
-		List<TrainerModelInput> inputs = new ArrayList<TrainerModelInput>();
+	public static List<TrainerModelInput> readTrainerModelInputs(final Properties properties) {
+		final List<TrainerModelInput> inputs = new ArrayList<>();
 		for (int i = 1;; ++i) {
-			TrainerModelInput input = createInput(properties, "input" + i);
-			if (input != null)
-				inputs.add(input);
-			else
+			final TrainerModelInput input = createInput(properties, "input" + i);
+			if (input == null) {
 				break;
+			}
+			inputs.add(input);
 		}
 		return inputs;
 	}
 
-	private static TrainerModelInput createInput(Properties properties, String name) {
+	private static TrainerModelInput createInput(final Properties properties, final String name) {
 		String inputName = properties.getProperty(name + ".name");
-		if (inputName != null && inputName.trim().length() > 0) {
-			inputName = inputName.trim();
-			Lettering title = readLettering(name + ".font.title.", properties);
-			Lettering input = readLettering(name + ".font.input.", properties);
-			Lettering print = readLettering(name + ".font.print.", properties);
-			Lettering list = readLettering(name + ".font.list.", properties);
-			@SuppressWarnings("unchecked")
-			Class<Document> documentClass = (Class<Document>) readClass(name + ".document", properties);
-			Locale locale = Locale.getDefault();
-			String localeString = properties.getProperty(name + ".locale").trim();
-			if (localeString != null && localeString.trim().length() > 0)
-				locale = findLocale(localeString);
-			Pattern pattern = readPattern(properties, name + ".linkRegex");
-			String searchLink = properties.getProperty(name + ".searchLink").trim();
-			List<TrainerModelInputAction> actions = loadInputActions(name + ".actions.", properties);
-			return new DefaultTrainerModelInput(inputName, title, input, print, list, documentClass, locale, pattern, searchLink, actions);
-		} else {
+		if ((inputName == null) || (inputName.trim().length() <= 0)) {
 			return null;
 		}
+		inputName = inputName.trim();
+		final Lettering title = readLettering(name + ".font.title.", properties);
+		final Lettering input = readLettering(name + ".font.input.", properties);
+		final Lettering print = readLettering(name + ".font.print.", properties);
+		final Lettering list = readLettering(name + ".font.list.", properties);
+		@SuppressWarnings("unchecked")
+		final Class<Document> documentClass = (Class<Document>) readClass(name + ".document", properties);
+		Locale locale = Locale.getDefault();
+		final String localeString = properties.getProperty(name + ".locale").trim();
+		if (localeString != null && localeString.trim().length() > 0) {
+			locale = findLocale(localeString);
+		}
+		final Pattern pattern = readPattern(properties, name + ".linkRegex");
+		final String searchLink = properties.getProperty(name + ".searchLink").trim();
+		final List<TrainerModelInputAction> actions = loadInputActions(name + ".actions.", properties);
+		return new DefaultTrainerModelInput(inputName, title, input, print, list, documentClass, locale, pattern,
+				searchLink, actions);
 	}
 
-	private static Locale findLocale(String string) {
-		if (string != null && string.trim().length() > 0) {
-			Locale language = null;
-			String[] parts = string.split("_", 2);
-			for (Locale locale : Locale.getAvailableLocales()) {
-				if (locale.getLanguage().equals(parts[0]) && locale.getCountry().equals(parts[1])) {
-					return locale;
-				} else if (locale.getLanguage().equals(parts[0])
-						&& (language == null || locale.getCountry() == null || locale.getCountry().trim().length() == 0)) {
-					language = locale;
-				}
-			}
-			return language;
-		} else {
+	private static Locale findLocale(final String string) {
+		if ((string == null) || (string.trim().length() <= 0)) {
 			return Locale.getDefault();
 		}
+		Locale language = null;
+		final String[] parts = string.split("_", 2);
+		for (final Locale locale : Locale.getAvailableLocales()) {
+			if (locale.getLanguage().equals(parts[0]) && locale.getCountry().equals(parts[1])) {
+				return locale;
+			} else if (locale.getLanguage().equals(parts[0])
+					&& (language == null || locale.getCountry() == null || locale.getCountry().trim().length() == 0)) {
+				language = locale;
+			}
+		}
+		return language;
 	}
 
-	private static Lettering readLettering(String prefix, Properties properties) {
-		String nameString = properties.getProperty(prefix + "name").trim();
-		String sizeString = properties.getProperty(prefix + "size").trim();
-		String styleString = properties.getProperty(prefix + "style").trim();
-		String colorString = properties.getProperty(prefix + "color");
-		String[] styles = styleString.split("\\s*[|]\\s*");
+	private static Lettering readLettering(final String prefix, final Properties properties) {
+		final String nameString = properties.getProperty(prefix + "name").trim();
+		final String sizeString = properties.getProperty(prefix + "size").trim();
+		final String styleString = properties.getProperty(prefix + "style").trim();
+		final String colorString = properties.getProperty(prefix + "color");
+		final String[] styles = styleString.split("\\s*[|]\\s*");
 		int style = Font.PLAIN;
-		for (String s : styles) {
-			if ("bold".equalsIgnoreCase(s))
+		for (final String s : styles) {
+			if ("bold".equalsIgnoreCase(s)) {
 				style |= Font.BOLD;
-			else if ("italic".equalsIgnoreCase(s))
+			} else if ("italic".equalsIgnoreCase(s)) {
 				style |= Font.ITALIC;
+			}
 		}
 		return new Lettering(new Font(nameString, style, Integer.parseInt(sizeString)), getColor(colorString));
 	}
 
-	private static Color getColor(String color) {
+	private static Color getColor(final String color) {
 		return Color.black; // TODO Farbe parsen
 	}
 
-	private static List<TrainerModelInputAction> loadInputActions(String prefix, Properties properties) {
-		List<TrainerModelInputAction> actions = new ArrayList<TrainerModelInputAction>();
+	private static List<TrainerModelInputAction> loadInputActions(final String prefix, final Properties properties) {
+		final List<TrainerModelInputAction> actions = new ArrayList<>();
 		// TTS
-		ActionParameters actTts = readActionParameters(properties, prefix + "tts", "type");
+		final ActionParameters actTts = readActionParameters(properties, prefix + "tts", "type");
 		if (actTts != null) {
 			try {
-				actions.add(new TextToSpeechAction(TextToSpeech.valueOf(actTts.getCommand()).getTextToSpeechProvider(), actTts.getPattern()));
-			}
-			catch (Exception e) {
+				actions.add(new TextToSpeechAction(TextToSpeech.valueOf(actTts.getCommand()).getTextToSpeechProvider(),
+						actTts.getPattern()));
+			} catch (final Exception e) {
 				System.err.println("Error loading TTS action for type: " + actTts.getCommand());
 			}
 		}
@@ -117,53 +118,56 @@ public class TrainerModelInputProvider {
 		return actions;
 	}
 
-	private static List<TrainerModelInputAction> readUrlActions(String prefix, Properties properties) {
-		if (!prefix.endsWith("."))
+	private static List<TrainerModelInputAction> readUrlActions(String prefix, final Properties properties) {
+		if (!prefix.endsWith(".")) {
 			prefix += ".";
-		List<TrainerModelInputAction> actions = new ArrayList<TrainerModelInputAction>();
+		}
+		final List<TrainerModelInputAction> actions = new ArrayList<>();
 
 		for (int i = 1;; ++i) {
-			TrainerModelInputAction input = readUrlAction(prefix + i + ".", properties);
-			if (input != null)
-				actions.add(input);
-			else
+			final TrainerModelInputAction input = readUrlAction(prefix + i + ".", properties);
+			if (input == null) {
 				break;
+			}
+			actions.add(input);
 		}
 
 		return actions;
 	}
 
-	private static TrainerModelInputAction readUrlAction(String prefix, Properties properties) {
-		String name = properties.getProperty(prefix + "name");
-		if (name != null && name.trim().length() > 0) {
-			String iconName = properties.getProperty(prefix + "icon");
-			String url = properties.getProperty(prefix + "url");
-			List<Pattern> patterns = new ArrayList<Pattern>();
-			Pattern pattern;
-			for (int i = 1; (pattern = readPattern(properties, prefix + "regex." + i)) != null; ++i) {
-				patterns.add(pattern);
-			}
-			return new UrlAction(name, patterns.toArray(new Pattern[0]), url, iconName);
-		} else {
+	private static TrainerModelInputAction readUrlAction(final String prefix, final Properties properties) {
+		final String name = properties.getProperty(prefix + "name");
+		if ((name == null) || (name.trim().length() <= 0)) {
 			return null;
 		}
+		final String iconName = properties.getProperty(prefix + "icon");
+		final String url = properties.getProperty(prefix + "url");
+		final List<Pattern> patterns = new ArrayList<>();
+		Pattern pattern;
+		for (int i = 1; (pattern = readPattern(properties, prefix + "regex." + i)) != null; ++i) {
+			patterns.add(pattern);
+		}
+		return new UrlAction(name, patterns.toArray(new Pattern[0]), url, iconName);
 	}
 
-	private static ActionParameters readActionParameters(Properties properties, String prefix, String name) {
-		if (!prefix.endsWith("."))
+	private static ActionParameters readActionParameters(final Properties properties, String prefix,
+			final String name) {
+		if (!prefix.endsWith(".")) {
 			prefix += ".";
-		String command = properties.getProperty(prefix + name);
-		if (command != null && !command.trim().isEmpty())
+		}
+		final String command = properties.getProperty(prefix + name);
+		if (command != null && !command.trim().isEmpty()) {
 			return new ActionParameters(command, readPattern(properties, prefix + "regex"));
-		else
-			return null;
+		}
+		return null;
 	}
 
-	private static Pattern readPattern(Properties properties, String prefix) {
+	private static Pattern readPattern(final Properties properties, String prefix) {
 		Pattern pattern = null;
-		if (!prefix.endsWith("."))
+		if (!prefix.endsWith(".")) {
 			prefix += ".";
-		String patternString = properties.getProperty(prefix + "text");
+		}
+		final String patternString = properties.getProperty(prefix + "text");
 		if (patternString != null && patternString.trim().length() > 0) {
 			pattern = Pattern.compile(patternString, getPatternFlags(properties.getProperty(prefix + "flags")));
 		}
@@ -174,7 +178,7 @@ public class TrainerModelInputProvider {
 		int style = 0;
 		if (flags != null) {
 			flags = flags.trim();
-			for (String flag : flags.split("\\s*[|]\\s*")) {
+			for (final String flag : flags.split("\\s*[|]\\s*")) {
 				if (flag == null || flag.trim().length() == 0) {
 					// nix
 				} else if ("CANON_EQ".equalsIgnoreCase(flag)) {
@@ -201,16 +205,14 @@ public class TrainerModelInputProvider {
 		return style;
 	}
 
-	private static Class<?> readClass(String key, Properties properties) {
-		String className = properties.getProperty(key);
-		if (className != null) {
-			try {
-				return Class.forName(className);
-			}
-			catch (ClassNotFoundException e) {
-				return null;
-			}
-		} else {
+	private static Class<?> readClass(final String key, final Properties properties) {
+		final String className = properties.getProperty(key);
+		if (className == null) {
+			return null;
+		}
+		try {
+			return Class.forName(className);
+		} catch (final ClassNotFoundException e) {
 			return null;
 		}
 	}
@@ -219,7 +221,7 @@ public class TrainerModelInputProvider {
 		private final String command;
 		private final Pattern pattern;
 
-		public ActionParameters(String command, Pattern pattern) {
+		public ActionParameters(final String command, final Pattern pattern) {
 			this.command = command;
 			this.pattern = pattern;
 		}

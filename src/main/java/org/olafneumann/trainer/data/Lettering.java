@@ -7,7 +7,7 @@ public class Lettering {
 	private Font font;
 	private Color color;
 
-	public Lettering(Font font, Color color) {
+	public Lettering(final Font font, final Color color) {
 		this.font = font;
 		this.color = color;
 	}
@@ -20,11 +20,11 @@ public class Lettering {
 		return font;
 	}
 
-	public void setColor(Color color) {
+	public void setColor(final Color color) {
 		this.color = color;
 	}
 
-	public void setFont(Font font) {
+	public void setFont(final Font font) {
 		this.font = font;
 	}
 }

@@ -3,7 +3,6 @@ package org.olafneumann.trainer.ui;
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -30,16 +29,17 @@ class TrainArea extends JPanel {
 	private final boolean showAdditionalInformation;
 
 	private final JPanel pnlActions = new JPanel(new GridLayout(1, 1));
-	private List<JButton> actionButtons = new ArrayList<JButton>();
+	private final List<JButton> actionButtons = new ArrayList<>();
 
-	public TrainArea(boolean showCaptions, boolean showAdditionalInformation) {
+	public TrainArea(final boolean showCaptions, final boolean showAdditionalInformation) {
 		this.showAdditionalInformation = showAdditionalInformation;
 		setLayout(new BorderLayout());
-		if (showCaptions)
+		if (showCaptions) {
 			add(lblTitle, BorderLayout.NORTH);
+		}
 		add(txtItem, BorderLayout.CENTER);
 
-		JPanel pnlActionHolder = new JPanel(new BorderLayout());
+		final JPanel pnlActionHolder = new JPanel(new BorderLayout());
 		pnlActionHolder.add(pnlActions, BorderLayout.NORTH);
 		add(pnlActionHolder, BorderLayout.EAST);
 
@@ -55,28 +55,24 @@ class TrainArea extends JPanel {
 		lblTitle.setText(input.getName());
 		txtItem.setText(makeLink(input, text, isImportant()));
 
-		for (JButton button : actionButtons) {
+		for (final JButton button : actionButtons) {
 			button.getParent().remove(button);
 		}
 		actionButtons.clear();
 
 		if (text.trim().length() > 0) {
-			TrainerModelInputAction[] actions = input.getTrainerModelInputActions();
+			final TrainerModelInputAction[] actions = input.getTrainerModelInputActions();
 			((GridLayout) pnlActions.getLayout()).setRows(actions.length);
 
 			for (final TrainerModelInputAction action : actions) {
 				final JButton button = new JButton(action.getIcon());
-				if (action.getIcon() == null)
+				if (action.getIcon() == null) {
 					button.setText(action.toString());
+				}
 				actionButtons.add(button);
 				pnlActions.add(button);
 				button.setToolTipText(action.getActionTooltip());
-				button.addActionListener(new ActionListener() {
-					@Override
-					public void actionPerformed(ActionEvent event) {
-						actionSelected(button, input, action, text);
-					}
-				});
+				button.addActionListener(event -> actionSelected(button, input, action, text));
 			}
 		}
 
@@ -84,43 +80,42 @@ class TrainArea extends JPanel {
 		repaint();
 	}
 
-	void addHyperlinkListener(HyperlinkListener listener) {
+	void addHyperlinkListener(final HyperlinkListener listener) {
 		txtItem.addHyperlinkListener(listener);
 	}
 
-	void removeHyperlinkListener(HyperlinkListener listener) {
+	void removeHyperlinkListener(final HyperlinkListener listener) {
 		txtItem.removeHyperlinkListener(listener);
 	}
 
-	private String makeLink(TrainerModelInput input, String string, boolean important) {
+	private String makeLink(final TrainerModelInput input, final String string, final boolean important) {
 		if (input.getLinkPattern() == null) {
 			return string;
-		} else {
-			Matcher matcher = input.getLinkPattern().matcher(string);
-			StringBuilder sb = new StringBuilder();
-			sb.append("<html>").append( //$NON-NLS-1$
-					ONUtils.getFontDiv(input.getInputLettering().getFont(), important, important ? 2.0 : 1.5));
-			int last = 0;
-			while (matcher.find()) {
-				sb.append(string.substring(last, matcher.start()));
-				String match = matcher.groupCount() > 0 ? matcher.group(1) : matcher.group();
-				String link = input.getSearchUrl(match);
-				if (link != null) {
-					sb.append("<a href=\"").append(link).append("\" style=\"color:#00F;text-decoration:none;\">") //$NON-NLS-1$ //$NON-NLS-2$
-					.append(match).append("</a>"); //$NON-NLS-1$
-				} else {
-					sb.append(match);
-				}
-				last = matcher.end();
-			}
-			// did we find anything?
-			if (sb.length() == 0) {
-				return string;
+		}
+		final Matcher matcher = input.getLinkPattern().matcher(string);
+		final StringBuilder sb = new StringBuilder();
+		sb.append("<html>").append( //$NON-NLS-1$
+				ONUtils.getFontDiv(input.getInputLettering().getFont(), important, important ? 2.0 : 1.5));
+		int last = 0;
+		while (matcher.find()) {
+			sb.append(string.substring(last, matcher.start()));
+			final String match = matcher.groupCount() > 0 ? matcher.group(1) : matcher.group();
+			final String link = input.getSearchUrl(match);
+			if (link != null) {
+				sb.append("<a href=\"").append(link).append("\" style=\"color:#00F;text-decoration:none;\">") //$NON-NLS-1$ //$NON-NLS-2$
+						.append(match).append("</a>"); //$NON-NLS-1$
 			} else {
-				sb.append(string.substring(last, string.length()));
-				sb.append("</div>").append("</html>"); //$NON-NLS-1$ //$NON-NLS-2$
-				return sb.toString();
+				sb.append(match);
 			}
+			last = matcher.end();
+		}
+		// did we find anything?
+		if (sb.length() == 0) {
+			return string;
+		} else {
+			sb.append(string.substring(last));
+			sb.append("</div>").append("</html>"); //$NON-NLS-1$ //$NON-NLS-2$
+			return sb.toString();
 		}
 	}
 
@@ -128,23 +123,24 @@ class TrainArea extends JPanel {
 		return txtItem.isVisible();
 	}
 
-	public void setTextVisible(boolean visible) {
+	public void setTextVisible(final boolean visible) {
 		txtItem.setVisible(visible);
 	}
 
-	private void actionSelected(JComponent component, final TrainerModelInput input, final TrainerModelInputAction action, String text) {
-		List<String> texts = action.getTexts(text);
+	private void actionSelected(final JComponent component, final TrainerModelInput input,
+			final TrainerModelInputAction action, final String text) {
+		final List<String> texts = action.getTexts(text);
 		if (texts == null || texts.isEmpty() || texts.size() == 1) {
 			doPerformAction(input, action, texts == null || texts.isEmpty() ? text : texts.get(0));
 		} else {
-			JPopupMenu menu = new JPopupMenu();
+			final JPopupMenu menu = new JPopupMenu();
 			for (final String string : texts) {
-				JMenuItem item = new JMenuItem(string);
+				final JMenuItem item = new JMenuItem(string);
 				item.addActionListener(new AbstractAction() {
 					private static final long serialVersionUID = 1L;
 
 					@Override
-					public void actionPerformed(ActionEvent e) {
+					public void actionPerformed(final ActionEvent e) {
 						doPerformAction(input, action, string);
 					}
 				});
@@ -154,12 +150,8 @@ class TrainArea extends JPanel {
 		}
 	}
 
-	private void doPerformAction(final TrainerModelInput input, final TrainerModelInputAction action, final String text) {
-		SwingUtilities.invokeLater(new Runnable() {
-			@Override
-			public void run() {
-				action.performInputAction(input, text);
-			}
-		});
+	private void doPerformAction(final TrainerModelInput input, final TrainerModelInputAction action,
+			final String text) {
+		SwingUtilities.invokeLater(() -> action.performInputAction(input, text));
 	}
 }

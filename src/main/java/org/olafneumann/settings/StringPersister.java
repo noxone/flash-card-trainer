@@ -7,14 +7,14 @@ import org.jdom2.Element;
 
 class StringPersister implements SettingsPersister<String> {
 	@Override
-	public boolean save(Saver saver, Element xml,Type type, String object) {
+	public boolean save(final Saver saver, final Element xml, final Type type, final String object) {
 		saver.setSaved(object);
 		xml.setContent(new CDATA(object));
 		return true;
 	}
 
 	@Override
-	public String load(Loader loader, Element xml, Type type) {
+	public String load(final Loader loader, final Element xml, final Type type) {
 		return xml.getText();
 	}
 

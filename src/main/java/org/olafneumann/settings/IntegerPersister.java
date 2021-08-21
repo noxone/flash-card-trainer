@@ -4,15 +4,15 @@ import java.lang.reflect.Type;
 
 import org.jdom2.Element;
 
-class IntegerPersister implements SettingsPersister<Integer>{
+class IntegerPersister implements SettingsPersister<Integer> {
 	@Override
-	public boolean save(Saver saver, Element xml,Type type, Integer object) {
+	public boolean save(final Saver saver, final Element xml, final Type type, final Integer object) {
 		xml.setText(object.toString());
 		return true;
 	}
 
 	@Override
-	public Integer load(Loader loader, Element xml, Type type) {
+	public Integer load(final Loader loader, final Element xml, final Type type) {
 		return Integer.parseInt(xml.getText());
 	}
 

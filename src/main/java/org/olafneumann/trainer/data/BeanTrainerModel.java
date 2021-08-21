@@ -14,19 +14,19 @@ import javax.swing.AbstractListModel;
 public class BeanTrainerModel extends AbstractListModel<BeanTrainerItem> implements TrainerModel<BeanTrainerItem> {
 	private static final long serialVersionUID = 7256503462050207836L;
 
-	private List<BeanTrainerItem> items = new ArrayList<BeanTrainerItem>();
-	private Map<BeanTrainerItem, Set<Integer>> known = new HashMap<BeanTrainerItem, Set<Integer>>();
+	private List<BeanTrainerItem> items = new ArrayList<>();
+	private Map<BeanTrainerItem, Set<Integer>> known = new HashMap<>();
 
-	private List<BeanTrainerItemGroup> groups = new ArrayList<BeanTrainerItemGroup>();
+	private List<BeanTrainerItemGroup> groups = new ArrayList<>();
 
 	boolean changes = false;
 
 	@Override
-	public synchronized int addItem(String[] values) {
+	public synchronized int addItem(final String[] values) {
 		return addItem(createItem(values));
 	}
 
-	public synchronized int addItem(BeanTrainerItem item) {
+	public synchronized int addItem(final BeanTrainerItem item) {
 		items.add(item);
 		fireIntervalAdded(this, items.size() - 1, items.size() - 1);
 		return items.size() - 1;
@@ -38,14 +38,14 @@ public class BeanTrainerModel extends AbstractListModel<BeanTrainerItem> impleme
 	}
 
 	@Override
-	public BeanTrainerItem get(int index) {
+	public BeanTrainerItem get(final int index) {
 		return items.get(index);
 	}
 
 	@Override
-	public TrainerItem remove(int index) {
+	public TrainerItem remove(final int index) {
 		try {
-			BeanTrainerItem item = items.remove(index);
+			final BeanTrainerItem item = items.remove(index);
 			known.remove(item);
 			return item;
 		} finally {
@@ -59,19 +59,22 @@ public class BeanTrainerModel extends AbstractListModel<BeanTrainerItem> impleme
 		fireContentsChanged(this, 0, size() - 1);
 	}
 
-	boolean isKnown(BeanTrainerItem item, int index) {
+	boolean isKnown(final BeanTrainerItem item, final int index) {
 		return known.containsKey(item) && known.get(item).contains(index);
 	}
 
-	void setKnown(BeanTrainerItem item, int index, boolean known) {
-		if (!this.known.containsKey(item))
+	void setKnown(final BeanTrainerItem item, final int index, final boolean known) {
+		if (!this.known.containsKey(item)) {
 			this.known.put(item, new HashSet<Integer>());
-		if (known)
+		}
+		if (known) {
 			this.known.get(item).add(index);
-		else
+		} else {
 			this.known.get(item).remove(index);
-		if (this.known.get(item).isEmpty())
+		}
+		if (this.known.get(item).isEmpty()) {
 			this.known.remove(item);
+		}
 		fireContentsChanged(this, items.indexOf(item), items.indexOf(item));
 	}
 
@@ -79,17 +82,16 @@ public class BeanTrainerModel extends AbstractListModel<BeanTrainerItem> impleme
 	public boolean hasUnknownItems() {
 		if (known.size() < items.size()) {
 			return true;
-		} else {
-			for (BeanTrainerItem item : known.keySet()) {
-				if (!isCompletelyKnown(item)) {
-					return true;
-				}
+		}
+		for (final BeanTrainerItem item : known.keySet()) {
+			if (!isCompletelyKnown(item)) {
+				return true;
 			}
 		}
 		return false;
 	}
 
-	private boolean isCompletelyKnown(BeanTrainerItem item) {
+	private boolean isCompletelyKnown(final BeanTrainerItem item) {
 		for (int i = 0; i < item.getValues().length; ++i) {
 			if (!item.isKnown(i)) {
 				return false;
@@ -109,24 +111,27 @@ public class BeanTrainerModel extends AbstractListModel<BeanTrainerItem> impleme
 
 	@Override
 	public int countKnownItems() {
-		int size = getInputSize();
+		final int size = getInputSize();
 		int counter = 0;
-		for (Entry<BeanTrainerItem, Set<Integer>> entry : known.entrySet())
-			if (entry.getValue().size() == size)
+		for (final Entry<BeanTrainerItem, Set<Integer>> entry : known.entrySet()) {
+			if (entry.getValue().size() == size) {
 				++counter;
+			}
+		}
 		return counter;
 	}
 
 	@Override
 	public int countKnownItemInputs() {
 		int counter = 0;
-		for (Set<Integer> knowns : known.values())
+		for (final Set<Integer> knowns : known.values()) {
 			counter += knowns.size();
+		}
 		return counter;
 	}
 
 	@Override
-	public BeanTrainerItem getElementAt(int index) {
+	public BeanTrainerItem getElementAt(final int index) {
 		return get(index);
 	}
 
@@ -135,8 +140,8 @@ public class BeanTrainerModel extends AbstractListModel<BeanTrainerItem> impleme
 		return size();
 	}
 
-	protected BeanTrainerItem createItem(String[] values) {
-		BeanTrainerItem item = new BeanTrainerItem(this);
+	protected BeanTrainerItem createItem(final String[] values) {
+		final BeanTrainerItem item = new BeanTrainerItem(this);
 		for (int i = 0; i < values.length; ++i) {
 			item.setValue(i, values[i]);
 		}
@@ -148,11 +153,12 @@ public class BeanTrainerModel extends AbstractListModel<BeanTrainerItem> impleme
 		return items.iterator();
 	}
 
+	@Override
 	public List<BeanTrainerItem> getItems() {
 		return items;
 	}
 
-	public void setItems(List<BeanTrainerItem> items) {
+	public void setItems(final List<BeanTrainerItem> items) {
 		this.items = items;
 	}
 
@@ -160,7 +166,7 @@ public class BeanTrainerModel extends AbstractListModel<BeanTrainerItem> impleme
 		return known;
 	}
 
-	public void setKnown(Map<BeanTrainerItem, Set<Integer>> known) {
+	public void setKnown(final Map<BeanTrainerItem, Set<Integer>> known) {
 		this.known = known;
 	}
 
@@ -170,24 +176,24 @@ public class BeanTrainerModel extends AbstractListModel<BeanTrainerItem> impleme
 	}
 
 	@Override
-	public void setHasChanges(boolean changes) {
+	public void setHasChanges(final boolean changes) {
 		this.changes = changes;
 	}
 
 	@Override
-	protected void fireContentsChanged(Object source, int index0, int index1) {
+	protected void fireContentsChanged(final Object source, final int index0, final int index1) {
 		setHasChanges(true);
 		super.fireContentsChanged(source, index0, index1);
 	}
 
 	@Override
-	protected void fireIntervalAdded(Object source, int index0, int index1) {
+	protected void fireIntervalAdded(final Object source, final int index0, final int index1) {
 		setHasChanges(true);
 		super.fireIntervalAdded(source, index0, index1);
 	}
 
 	@Override
-	protected void fireIntervalRemoved(Object source, int index0, int index1) {
+	protected void fireIntervalRemoved(final Object source, final int index0, final int index1) {
 		setHasChanges(true);
 		super.fireIntervalRemoved(source, index0, index1);
 	}
@@ -197,7 +203,7 @@ public class BeanTrainerModel extends AbstractListModel<BeanTrainerItem> impleme
 		return groups;
 	}
 
-	public void setGroups(List<BeanTrainerItemGroup> groups) {
+	public void setGroups(final List<BeanTrainerItemGroup> groups) {
 		this.groups = groups;
 	}
 }

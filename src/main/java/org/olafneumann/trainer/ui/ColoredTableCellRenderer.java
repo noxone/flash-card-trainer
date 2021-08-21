@@ -11,24 +11,26 @@ class ColoredTableCellRenderer extends DefaultTableCellRenderer {
 	private static final long serialVersionUID = -482079833349029521L;
 
 	@Override
-	public ColoredTableCellRenderer getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
-			boolean hasFocus, int row, int column) {
-		ColoredTableCellRenderer renderer = (ColoredTableCellRenderer) super.getTableCellRendererComponent(table,
+	public ColoredTableCellRenderer getTableCellRendererComponent(final JTable table, final Object value,
+			final boolean isSelected, final boolean hasFocus, final int row, final int column) {
+		final ColoredTableCellRenderer renderer = (ColoredTableCellRenderer) super.getTableCellRendererComponent(table,
 				value, isSelected, hasFocus, row, column);
 
 		if (!isSelected) {
-			TrainerItem item = (TrainerItem) value;
-			StringBuffer sb = new StringBuffer();
+			final TrainerItem item = (TrainerItem) value;
+			final StringBuffer sb = new StringBuffer();
 			sb.append("<html>"); //$NON-NLS-1$
 			boolean needSeparator = false;
-			String[] values = item.getValues();
+			final String[] values = item.getValues();
 			int known = 0;
 			for (int i = 0; i < values.length; ++i) {
-				if (needSeparator)
+				if (needSeparator) {
 					sb.append(" / "); //$NON-NLS-1$
+				}
 				// TODO Schrift aus dem Input übernehmen
-				if (item.isKnown(i))
+				if (item.isKnown(i)) {
 					++known;
+				}
 				sb.append(getSpanStart(null, item.isKnown(i) ? "green" : "red")); //$NON-NLS-1$ //$NON-NLS-2$
 				sb.append(values[i]);
 				needSeparator = values[i] == null || !values[i].trim().isEmpty();
@@ -41,8 +43,8 @@ class ColoredTableCellRenderer extends DefaultTableCellRenderer {
 		return renderer;
 	}
 
-	private CharSequence getSpanStart(Font font, String color) {
-		StringBuilder sb = new StringBuilder();
+	private CharSequence getSpanStart(final Font font, final String color) {
+		final StringBuilder sb = new StringBuilder();
 		sb.append("<span "); //$NON-NLS-1$
 		sb.append("style=\""); //$NON-NLS-1$
 		if (font != null) {

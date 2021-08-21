@@ -7,8 +7,6 @@ import java.awt.Frame;
 import java.awt.GridLayout;
 import java.awt.KeyEventDispatcher;
 import java.awt.KeyboardFocusManager;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -32,66 +30,57 @@ class TrainerWindow extends JFrame implements QuestionItemListener {
 
 	private static TrainerWindow window = null;
 
-	public static synchronized void showWindow(final JFrame owner, final QuestionItem item, final boolean showCaptions) {
+	public static synchronized void showWindow(final JFrame owner, final QuestionItem item,
+			final boolean showCaptions) {
 		if (window == null && item != null) {
-			SwingUtilities.invokeLater(new Runnable() {
-				@Override
-				public void run() {
-					window = new TrainerWindow(owner, item, showCaptions);
+			SwingUtilities.invokeLater(() -> {
+				window = new TrainerWindow(owner, item, showCaptions);
+				window.setExtendedState(owner.getExtendedState());
+				window.setVisible(true);
+				if (window.getExtendedState() == ICONIFIED) {
 					window.setExtendedState(owner.getExtendedState());
-					window.setVisible(true);
-					if (window.getExtendedState() == ICONIFIED) {
-						window.setExtendedState(owner.getExtendedState());
-					}
-					KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(
-							window.keyEventDispatcher);
 				}
+				KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(window.keyEventDispatcher);
 			});
 		} else {
-			SwingUtilities.invokeLater(new Runnable() {
-				@Override
-				public void run() {
-					window.requestFocus();
-				}
-			});
+			SwingUtilities.invokeLater(() -> window.requestFocus());
 		}
 	}
 
 	public static synchronized void hideWindow() {
 		if (window != null) {
-			SwingUtilities.invokeLater(new Runnable() {
-				@Override
-				public void run() {
-					if (window.item != null)
-						window.item.removeQuestionItemListener(window);
-
-					window.setVisible(false);
-					window.dispose();
-					KeyboardFocusManager.getCurrentKeyboardFocusManager().removeKeyEventDispatcher(
-							window.keyEventDispatcher);
-					window = null;
+			SwingUtilities.invokeLater(() -> {
+				if (window.item != null) {
+					window.item.removeQuestionItemListener(window);
 				}
+
+				window.setVisible(false);
+				window.dispose();
+				KeyboardFocusManager.getCurrentKeyboardFocusManager()
+						.removeKeyEventDispatcher(window.keyEventDispatcher);
+				window = null;
 			});
 		}
 	}
 
-	private KeyEventDispatcher keyEventDispatcher = new KeyEventDispatcher() {
-		private boolean isInThisWindow(Object source) {
-			if (source instanceof KeyEvent)
+	private final KeyEventDispatcher keyEventDispatcher = new KeyEventDispatcher() {
+		private boolean isInThisWindow(final Object source) {
+			if (source instanceof KeyEvent) {
 				return isInThisWindow(((KeyEvent) source).getSource());
-			else if (source instanceof Component) {
-				Component component = (Component) source;
-				if (component instanceof Frame)
+			}
+			if (source instanceof Component) {
+				final Component component = (Component) source;
+				if (component instanceof Frame) {
 					return component == TrainerWindow.this;
-				else
-					return isInThisWindow(component.getParent());
+				}
+				return isInThisWindow(component.getParent());
 			}
 
 			return false;
 		}
 
 		@Override
-		public boolean dispatchKeyEvent(KeyEvent event) {
+		public boolean dispatchKeyEvent(final KeyEvent event) {
 			if (isInThisWindow(event) && event.getID() == KeyEvent.KEY_TYPED) {
 				switch (event.getKeyChar()) {
 				case 'n':
@@ -132,20 +121,20 @@ class TrainerWindow extends JFrame implements QuestionItemListener {
 		}
 	};
 
-	private TrainArea txtQuestion;
-	private TrainArea[] txtAnswers;
-	private JButton btnNext;
-	private JButton btnGewusst;
-	private JButton btnShowHide;
-	private JButton btnClose;
-	private JButton btnBack;
-	private JButton btnForward;
+	private final TrainArea txtQuestion;
+	private final TrainArea[] txtAnswers;
+	private final JButton btnNext;
+	private final JButton btnGewusst;
+	private final JButton btnShowHide;
+	private final JButton btnClose;
+	private final JButton btnBack;
+	private final JButton btnForward;
 
 	private QuestionItem item = null;
-	private final Stack<QuestionItem> historyBack = new Stack<QuestionItem>();
-	private final Stack<QuestionItem> historyForward = new Stack<QuestionItem>();
+	private final Stack<QuestionItem> historyBack = new Stack<>();
+	private final Stack<QuestionItem> historyForward = new Stack<>();
 
-	private TrainerWindow(JFrame owner, QuestionItem item, boolean showCaptions) {
+	private TrainerWindow(final JFrame owner, final QuestionItem item, final boolean showCaptions) {
 		this.item = item;
 		setIconImages(Icons.LOGO.getImageList());
 		setTitle(owner.getTitle() + " - " + Messages.getString("TrainerWindow.Title")); //$NON-NLS-1$ //$NON-NLS-2$
@@ -153,7 +142,7 @@ class TrainerWindow extends JFrame implements QuestionItemListener {
 		setMinimumSize(new Dimension(800, 600));
 		addWindowListener(new WindowAdapter() {
 			@Override
-			public void windowClosed(WindowEvent e) {
+			public void windowClosed(final WindowEvent e) {
 				hideWindow();
 			}
 		});
@@ -166,25 +155,27 @@ class TrainerWindow extends JFrame implements QuestionItemListener {
 		btnClose = new JButton(Icons.CLOSE.getImageIcon());
 		txtQuestion = new TrainArea(showCaptions, false);
 		txtAnswers = new TrainArea[item.getAnswers().length];
-		for (int i = 0; i < txtAnswers.length; ++i)
+		for (int i = 0; i < txtAnswers.length; ++i) {
 			txtAnswers[i] = new TrainArea(showCaptions, true);
+		}
 		btnNext.setToolTipText(Messages.getString("TrainerWindow.ShowNextVocab")); //$NON-NLS-1$
 		btnGewusst.setToolTipText(Messages.getString("TrainerWindow.IKnowThatVocab")); //$NON-NLS-1$
 		btnClose.setToolTipText(Messages.getString("TrainerWindow.CloseTrainer")); //$NON-NLS-1$
 		btnShowHide.setToolTipText(Messages.getString("TrainerWindow.ShowHideExplanation")); //$NON-NLS-1$
 
 		setLayout(new BorderLayout());
-		JPanel pnlButtons = new JPanel();
-		JPanel pnlButtonsTop = new JPanel();
-		JPanel pnlButtonsMain = new JPanel();
+		final JPanel pnlButtons = new JPanel();
+		final JPanel pnlButtonsTop = new JPanel();
+		final JPanel pnlButtonsMain = new JPanel();
 		pnlButtons.setLayout(new BorderLayout());
 		pnlButtonsTop.setLayout(new GridLayout(1, 2));
 		pnlButtonsMain.setLayout(new GridLayout(4, 1));
 		pnlButtonsMain.setMinimumSize(new Dimension(400, 100));
 
-		JPanel pnlAnswers = new JPanel(new GridLayout(1, txtAnswers.length));
-		for (JComponent txtAnswer : txtAnswers)
+		final JPanel pnlAnswers = new JPanel(new GridLayout(1, txtAnswers.length));
+		for (final JComponent txtAnswer : txtAnswers) {
 			pnlAnswers.add(txtAnswer);
+		}
 
 		add(txtQuestion, BorderLayout.NORTH);
 		add(pnlAnswers, BorderLayout.CENTER);
@@ -198,86 +189,56 @@ class TrainerWindow extends JFrame implements QuestionItemListener {
 		pnlButtons.add(pnlButtonsTop, BorderLayout.NORTH);
 		pnlButtons.add(pnlButtonsMain, BorderLayout.CENTER);
 
-		HyperlinkListener hll = new HyperlinkListener() {
-			@Override
-			public void hyperlinkUpdate(HyperlinkEvent hle) {
-				if (HyperlinkEvent.EventType.ACTIVATED.equals(hle.getEventType())) {
-					URL url = hle.getURL();
-					try {
-						LinkRunner.open(url.toURI());
-					} catch (URISyntaxException e) {
-						e.printStackTrace();
-					}
+		final HyperlinkListener hll = hle -> {
+			if (HyperlinkEvent.EventType.ACTIVATED.equals(hle.getEventType())) {
+				final URL url = hle.getURL();
+				try {
+					LinkRunner.open(url.toURI());
+				} catch (final URISyntaxException e) {
+					e.printStackTrace();
 				}
 			}
 		};
 
 		txtQuestion.addHyperlinkListener(hll);
-		for (TrainArea txtAnswer : txtAnswers) {
+		for (final TrainArea txtAnswer : txtAnswers) {
 			txtAnswer.addHyperlinkListener(hll);
 		}
 
 		setLocationRelativeTo(owner);
 
-		btnClose.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				hideWindow();
-			}
-		});
-		btnShowHide.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				setAnswerAreaVisibility(!areAnswersVisible());
-			}
-		});
-		btnGewusst.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				getNextData(true);
-			}
-		});
-		btnNext.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				getNextData(false);
-			}
-		});
-		btnBack.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				doGoBack();
-			}
-		});
-		btnForward.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				doGoForward();
-			}
-		});
+		btnClose.addActionListener(e -> hideWindow());
+		btnShowHide.addActionListener(e -> setAnswerAreaVisibility(!areAnswersVisible()));
+		btnGewusst.addActionListener(e -> getNextData(true));
+		btnNext.addActionListener(e -> getNextData(false));
+		btnBack.addActionListener(e -> doGoBack());
+		btnForward.addActionListener(e -> doGoForward());
 		questionItemChanged(item);
 		doEnablingDisabling();
 		pack();
 	}
 
 	private boolean areAnswersVisible() {
-		for (TrainArea txtAnswer : txtAnswers)
-			if (!txtAnswer.isTextVisible())
+		for (final TrainArea txtAnswer : txtAnswers) {
+			if (!txtAnswer.isTextVisible()) {
 				return false;
+			}
+		}
 		return true;
 	}
 
 	private void setAnswerAreaVisibility(final boolean visible) {
-		for (TrainArea txtAnswer : txtAnswers)
+		for (final TrainArea txtAnswer : txtAnswers) {
 			txtAnswer.setTextVisible(visible);
+		}
 	}
 
-	private void getNextData(boolean known) {
+	private void getNextData(final boolean known) {
 		addBackHistory(item, true);
 		setQuestionItem(item.getNext(known));
 	}
 
-	private void setQuestionItem(QuestionItem newItem) {
+	private void setQuestionItem(final QuestionItem newItem) {
 		if (item != null) {
 			item.removeQuestionItemListener(this);
 		}
@@ -293,7 +254,7 @@ class TrainerWindow extends JFrame implements QuestionItemListener {
 	}
 
 	@Override
-	public void questionItemChanged(QuestionItem item) {
+	public void questionItemChanged(final QuestionItem item) {
 		txtQuestion.setContent(item.getQuestionInput(), item.getQuestion());
 		setAnswerAreaVisibility(false);
 		for (int i = 0; i < txtAnswers.length; ++i) {
@@ -303,33 +264,32 @@ class TrainerWindow extends JFrame implements QuestionItemListener {
 		repaint();
 	}
 
-	private void addBackHistory(QuestionItem item, boolean clearForward) {
+	private void addBackHistory(final QuestionItem item, final boolean clearForward) {
 		if (historyBack.isEmpty() || !historyBack.peek().equals(item)) {
 			historyBack.push(item);
-			if (clearForward)
+			if (clearForward) {
 				historyForward.clear();
+			}
 		}
 		doEnablingDisabling();
 	}
 
-	private void addForwardHistory(QuestionItem item) {
+	private void addForwardHistory(final QuestionItem item) {
 		if (historyForward.isEmpty() || !historyForward.peek().equals(item)) {
 			historyForward.push(item);
 		}
 		doEnablingDisabling();
 	}
 
-	private void moveHistoryItem(boolean back) {
+	private void moveHistoryItem(final boolean back) {
 		if (back) {
 			if (!historyBack.isEmpty()) {
 				setQuestionItem(historyBack.pop());
 				addForwardHistory(item);
 			}
-		} else {
-			if (!historyForward.isEmpty()) {
-				setQuestionItem(historyForward.pop());
-				addBackHistory(item, false);
-			}
+		} else if (!historyForward.isEmpty()) {
+			setQuestionItem(historyForward.pop());
+			addBackHistory(item, false);
 		}
 		doEnablingDisabling();
 	}

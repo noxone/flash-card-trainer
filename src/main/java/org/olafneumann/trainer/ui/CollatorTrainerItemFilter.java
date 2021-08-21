@@ -15,7 +15,7 @@ class CollatorTrainerItemFilter extends RowFilter<ListTableModel<TrainerItem>, T
 	private final String text;
 	private final TrainerModelInput[] inputs;
 
-	public CollatorTrainerItemFilter(TrainerModelInput[] inputs, String text) {
+	public CollatorTrainerItemFilter(final TrainerModelInput[] inputs, final String text) {
 		this.text = text;
 		this.inputs = inputs;
 		collators = new RuleBasedCollator[inputs.length];
@@ -26,16 +26,16 @@ class CollatorTrainerItemFilter extends RowFilter<ListTableModel<TrainerItem>, T
 	}
 
 	@Override
-	public boolean include(Entry<? extends ListTableModel<TrainerItem>, ? extends TrainerItem> entry) {
-		TrainerItem item = (TrainerItem) entry.getValue(0);
-		String[] values = item.getValues();
+	public boolean include(final Entry<? extends ListTableModel<TrainerItem>, ? extends TrainerItem> entry) {
+		final TrainerItem item = (TrainerItem) entry.getValue(0);
+		final String[] values = item.getValues();
 		for (int index = 0; index < inputs.length; ++index) {
 			if (contains(values[index], text, inputs[index].getLocale())) {
 				return true;
 			}
 		}
 		boolean allEmpty = true;
-		for (String value : values) {
+		for (final String value : values) {
 			allEmpty &= value.trim().length() == 0;
 		}
 		return allEmpty;
@@ -43,43 +43,38 @@ class CollatorTrainerItemFilter extends RowFilter<ListTableModel<TrainerItem>, T
 
 	/**
 	 * Test whether one string contains another
-	 * 
-	 * @param s1
-	 *            the containing string
-	 * @param s2
-	 *            the contained string
+	 *
+	 * @param s1 the containing string
+	 * @param s2 the contained string
 	 * @return true iff s1 contains s2
 	 */
-	private boolean contains(String string1, String string2, Locale locale) {
+	private boolean contains(final String string1, final String string2, final Locale locale) {
 		return collationContains(getCollationElementIterator(string1, locale),
 				getCollationElementIterator(string2, locale), null, false);
 	}
 
-	private CollationElementIterator getCollationElementIterator(String string, Locale locale) {
-		RuleBasedCollator collator = (RuleBasedCollator) Collator.getInstance(locale);
+	private CollationElementIterator getCollationElementIterator(final String string, final Locale locale) {
+		final RuleBasedCollator collator = (RuleBasedCollator) Collator.getInstance(locale);
 		collator.setStrength(Collator.PRIMARY);
-		return (collator).getCollationElementIterator(string);
+		return collator.getCollationElementIterator(string);
 	}
 
 	/**
 	 * Determine whether one string contains another, under the terms of a given
-	 * collating sequence. If operation=ENDSWITH, the match must be at the end
-	 * of the first string.
-	 * 
-	 * @param s0
-	 *            iterator over the collation elements of the containing string
-	 * @param s1
-	 *            iterator over the collation elements of the contained string
-	 * @param offsets
-	 *            may be null, but if it is supplied, it must be an array of two
-	 *            integers which, if the function returns true, will contain the
-	 *            start position of the first matching substring, and the offset
-	 *            of the first character after the first matching substring.
-	 *            This is not available for operation=endswith
+	 * collating sequence. If operation=ENDSWITH, the match must be at the end of
+	 * the first string.
+	 *
+	 * @param s0      iterator over the collation elements of the containing string
+	 * @param s1      iterator over the collation elements of the contained string
+	 * @param offsets may be null, but if it is supplied, it must be an array of two
+	 *                integers which, if the function returns true, will contain the
+	 *                start position of the first matching substring, and the offset
+	 *                of the first character after the first matching substring.
+	 *                This is not available for operation=endswith
 	 * @return true if the first string contains the second
 	 */
-	private boolean collationContains(CollationElementIterator s0, CollationElementIterator s1, int[] offsets,
-			boolean matchAtEnd) {
+	private boolean collationContains(final CollationElementIterator s0, final CollationElementIterator s1,
+			final int[] offsets, final boolean matchAtEnd) {
 		int e0, e1;
 		do {
 			e1 = s1.next();
@@ -100,24 +95,23 @@ class CollatorTrainerItemFilter extends RowFilter<ListTableModel<TrainerItem>, T
 				}
 			}
 			// matched first character, note the position of the possible match
-			int start = s0.getOffset();
+			final int start = s0.getOffset();
 			if (collationStartsWith(s0, s1)) {
-				if (matchAtEnd) {
-					do {
-						e0 = s0.next();
-					} while (e0 == 0);
-					if (e0 == -1) {
-						// the match is at the end
-						return true;
-					}
-					// else ignore this match and keep looking
-				} else {
+				if (!matchAtEnd) {
 					if (offsets != null) {
 						offsets[0] = start - 1;
 						offsets[1] = s0.getOffset();
 					}
 					return true;
 				}
+				do {
+					e0 = s0.next();
+				} while (e0 == 0);
+				if (e0 == -1) {
+					// the match is at the end
+					return true;
+				}
+				// else ignore this match and keep looking
 			}
 			// reset the position and try again
 			s0.setOffset(start);
@@ -136,7 +130,7 @@ class CollatorTrainerItemFilter extends RowFilter<ListTableModel<TrainerItem>, T
 		}
 	}
 
-	private boolean collationStartsWith(CollationElementIterator s0, CollationElementIterator s1) {
+	private boolean collationStartsWith(final CollationElementIterator s0, final CollationElementIterator s1) {
 		while (true) {
 			int e0, e1;
 			do {

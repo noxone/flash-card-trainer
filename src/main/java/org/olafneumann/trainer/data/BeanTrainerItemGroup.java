@@ -28,13 +28,13 @@ public class BeanTrainerItemGroup implements TrainerItemGroup<BeanTrainerItem> {
 	}
 
 	@Override
-	public void add(BeanTrainerItem item) {
+	public void add(final BeanTrainerItem item) {
 		items.add(item);
 
 	}
 
 	@Override
-	public void remove(BeanTrainerItem item) {
+	public void remove(final BeanTrainerItem item) {
 		items.remove(item);
 	}
 
@@ -47,15 +47,15 @@ public class BeanTrainerItemGroup implements TrainerItemGroup<BeanTrainerItem> {
 		return items;
 	}
 
-	public void setItems(List<BeanTrainerItem> items) {
+	public void setItems(final List<BeanTrainerItem> items) {
 		this.items = items;
 	}
 
-	public void setName(String name) {
+	public void setName(final String name) {
 		this.name = name;
 	}
 
-	public void setModel(BeanTrainerModel model) {
+	public void setModel(final BeanTrainerModel model) {
 		this.model = model;
 	}
 

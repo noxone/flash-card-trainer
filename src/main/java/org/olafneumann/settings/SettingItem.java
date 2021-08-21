@@ -9,7 +9,7 @@ class SettingItem {
 	private final Method getter;
 	private final Method setter;
 
-	SettingItem(Object settings, String name, Method getter, Method setter) {
+	SettingItem(final Object settings, final String name, final Method getter, final Method setter) {
 		this.settings = settings;
 		this.name = name;
 		this.getter = getter;
@@ -24,10 +24,10 @@ class SettingItem {
 		return getter.getGenericReturnType();
 	}
 
-	void set(Object object) {
+	void set(final Object object) {
 		try {
 			setter.invoke(settings, object);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			throw new RuntimeException(e);
 		}
 	}
@@ -35,7 +35,7 @@ class SettingItem {
 	Object get() {
 		try {
 			return getter.invoke(settings);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			throw new RuntimeException(e);
 		}
 	}

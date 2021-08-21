@@ -11,9 +11,10 @@ class ListPersister implements SettingsPersister<List<?>> {
 	private static final String ITEM = "item";
 
 	@Override
-	public boolean save(Saver saver, Element xml,Type type, List<?> object) throws SettingsException {
+	public boolean save(final Saver saver, final Element xml, final Type type, final List<?> object)
+			throws SettingsException {
 		saver.setSaved(object);
-		for (Object item : object) {
+		for (final Object item : object) {
 			saver.saveXml(xml, item.getClass(), ITEM, item);
 		}
 		return true;
@@ -21,14 +22,15 @@ class ListPersister implements SettingsPersister<List<?>> {
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override
-	public List<?> load(Loader loader, Element xml, Type type) throws SettingsException {
-		List list = new ArrayList<Object>();
+	public List<?> load(final Loader loader, final Element xml, final Type type) throws SettingsException {
+		final List list = new ArrayList<>();
 		loader.setLoaded(xml.getAttributeValue(ObjectRegistry.XML_ATTR_ID), list);
-		for (Element child : xml.getChildren(ITEM)) {
-			if (type instanceof ParameterizedType)
+		for (final Element child : xml.getChildren(ITEM)) {
+			if (type instanceof ParameterizedType) {
 				list.add(loader.loadXml(child, ((ParameterizedType) type).getActualTypeArguments()[0]));
-			else
+			} else {
 				list.add(loader.loadXml(child, Object.class));
+			}
 		}
 		return list;
 	}
@@ -38,16 +40,15 @@ class ListPersister implements SettingsPersister<List<?>> {
 		return List.class;
 	}
 
-	public static final TypeDescription TYPE_DESCRIPTION = new TypeDescription() {
-		@Override
-		public boolean appliesTo(Type type) {
-			if (type instanceof Class<?>)
-				return List.class.isAssignableFrom((Class<?>) type);
-			else if (type instanceof ParameterizedType)
-				return appliesTo(((ParameterizedType) type).getRawType());
-			else
-				System.err.println("Unknown type: " + type + " - " + type.getClass().getName());
-			return false;
+	public static final TypeDescription TYPE_DESCRIPTION = type -> {
+		if (type instanceof Class<?>) {
+			return List.class.isAssignableFrom((Class<?>) type);
 		}
+		if (type instanceof ParameterizedType) {
+			return ListPersister.TYPE_DESCRIPTION.appliesTo(((ParameterizedType) type).getRawType());
+		} else {
+			System.err.println("Unknown type: " + type + " - " + type.getClass().getName());
+		}
+		return false;
 	};
 }

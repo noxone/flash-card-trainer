@@ -1,7 +1,5 @@
 package org.olafneumann.trainer.ui;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -11,13 +9,13 @@ import javax.swing.JMenuItem;
 
 class UndoManager<T> {
 	private UndoListener<T> undoListener;
-	private Stack<T> stack = new Stack<T>();
+	private final Stack<T> stack = new Stack<>();
 
-	UndoManager(UndoListener<T> undoListener) {
+	UndoManager(final UndoListener<T> undoListener) {
 		this.undoListener = undoListener;
 	}
 
-	public int push(T object) {
+	public int push(final T object) {
 		stack.push(object);
 		return stack.size();
 	}
@@ -33,33 +31,28 @@ class UndoManager<T> {
 	public void clear() {
 		stack.clear();
 	}
-	
-	public boolean isEmpty(){
+
+	public boolean isEmpty() {
 		return stack.isEmpty();
 	}
 
 	Collection<JMenuItem> createMenuItems() {
-		List<JMenuItem> items = new ArrayList<JMenuItem>();
+		final List<JMenuItem> items = new ArrayList<>();
 		if (!stack.isEmpty()) {
 			for (final T object : stack) {
-				JMenuItem item = new JMenuItem(object.toString());
-				item.addActionListener(new ActionListener() {
-					@Override
-					public void actionPerformed(ActionEvent event) {
-						undo(object);
-					}
-				});
+				final JMenuItem item = new JMenuItem(object.toString());
+				item.addActionListener(event -> undo(object));
 				items.add(item);
 			}
 		} else {
-			JMenuItem item = new JMenuItem(Messages.getString("UndoManager.NothingToUndo")); //$NON-NLS-1$
+			final JMenuItem item = new JMenuItem(Messages.getString("UndoManager.NothingToUndo")); //$NON-NLS-1$
 			item.setEnabled(false);
 			items.add(item);
 		}
 		return items;
 	}
 
-	private void undo(T object) {
+	private void undo(final T object) {
 		if (object != null) {
 			stack.remove(object);
 			undoListener.undo(object);
@@ -74,7 +67,7 @@ class UndoManager<T> {
 		return undoListener;
 	}
 
-	public void setUndoListener(UndoListener<T> undoListener) {
+	public void setUndoListener(final UndoListener<T> undoListener) {
 		this.undoListener = undoListener;
 	}
 }

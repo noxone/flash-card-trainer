@@ -11,11 +11,11 @@ public class Settings {
 	Settings() {
 	}
 
-	void load(Properties properties) {
+	void load(final Properties properties) {
 		title = properties.getProperty("application.title", DEFAULT_APPLICATION_TITLE);
 		try {
 			showCaptions = Boolean.parseBoolean(properties.getProperty("application.trainer.showCaptions"));
-		} catch (Exception e) {
+		} catch (final Exception e) {
 		}
 	}
 
@@ -23,7 +23,7 @@ public class Settings {
 		return title;
 	}
 
-	public void setTitle(String title) {
+	public void setTitle(final String title) {
 		this.title = title;
 	}
 
@@ -31,7 +31,7 @@ public class Settings {
 		return showCaptions;
 	}
 
-	public void setShowCaptions(boolean showCaptions) {
+	public void setShowCaptions(final boolean showCaptions) {
 		this.showCaptions = showCaptions;
 	}
 }

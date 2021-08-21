@@ -5,13 +5,13 @@ import java.awt.Cursor;
 import java.awt.Frame;
 import java.awt.GridLayout;
 import java.awt.Rectangle;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
+import java.util.Arrays;
 
 import javax.swing.AbstractListModel;
 import javax.swing.Icon;
@@ -36,8 +36,6 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableRowSorter;
 
@@ -58,14 +56,11 @@ public class MainWindow extends JFrame {
 	public static synchronized void showWindow(final Settings settings, final TrainerModel<?> model) {
 		if (window == null) {
 			try {
-				SwingUtilities.invokeAndWait(new Runnable() {
-					@Override
-					public void run() {
-						window = new MainWindow(settings, model);
-						window.setVisible(true);
-					}
+				SwingUtilities.invokeAndWait(() -> {
+					window = new MainWindow(settings, model);
+					window.setVisible(true);
 				});
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				e.printStackTrace();
 			}
 		}
@@ -74,15 +69,12 @@ public class MainWindow extends JFrame {
 	public static synchronized void hideWindow() {
 		if (window != null) {
 			try {
-				SwingUtilities.invokeLater(new Runnable() {
-					@Override
-					public void run() {
-						window.setVisible(false);
-						window.dispose();
-						window = null;
-					}
+				SwingUtilities.invokeLater(() -> {
+					window.setVisible(false);
+					window.dispose();
+					window = null;
 				});
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				e.printStackTrace();
 			}
 		}
@@ -92,15 +84,15 @@ public class MainWindow extends JFrame {
 		return window;
 	}
 
-	private static InputArea[] createInputAreas(TrainerModelInput[] inputs) {
-		InputArea[] areas = new InputArea[inputs.length];
+	private static InputArea[] createInputAreas(final TrainerModelInput[] inputs) {
+		final InputArea[] areas = new InputArea[inputs.length];
 		for (int i = 0; i < areas.length; ++i) {
 			areas[i] = new InputArea(inputs[i]);
 		}
 		return areas;
 	}
 
-	private MainWindowSettings windowSettings = new MainWindowSettings();
+	private final MainWindowSettings windowSettings = new MainWindowSettings();
 
 	private JTable tblItems;
 	private JTextField txtItemFilter;
@@ -115,16 +107,13 @@ public class MainWindow extends JFrame {
 	private JButton btnFileSave;
 	private JButton btnTrainer;
 
-	private UndoListener<TrainerItem> trainerItemUndoListener = new UndoListener<TrainerItem>() {
-		@Override
-		public void undo(TrainerItem item) {
-			int index = getModel().addItem(item.getValues());
-			setSelectedModelIndex(index);
-		}
+	private final UndoListener<TrainerItem> trainerItemUndoListener = item -> {
+		final int index = getModel().addItem(item.getValues());
+		setSelectedModelIndex(index);
 	};
 
 	private TrainerModel<?> model;
-	private UndoManager<TrainerItem> removedItems = new UndoManager<TrainerItem>(trainerItemUndoListener);
+	private final UndoManager<TrainerItem> removedItems = new UndoManager<>(trainerItemUndoListener);
 
 	private final Settings settings;
 
@@ -134,27 +123,27 @@ public class MainWindow extends JFrame {
 	private boolean updatingList = false;
 
 	@SuppressWarnings("unchecked")
-	private MainWindow(Settings settings, TrainerModel<?> model) {
+	private MainWindow(final Settings settings, final TrainerModel<?> model) {
 		super(settings.getTitle());
 		this.settings = settings;
 		setModel(model);
 		setIconImages(Icons.LOGO.getImageList());
 		setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
-		//com.apple.eawt.Application.getApplication().setDockIconImage(Icons.LOGO.getImage());
-		//com.apple.eawt.Application.getApplication().setDockIconBadge("5");
+		// com.apple.eawt.Application.getApplication().setDockIconImage(Icons.LOGO.getImage());
+		// com.apple.eawt.Application.getApplication().setDockIconBadge("5");
 		addWindowListener(new TrainerWindowListener());
 
 		addWindowListener(new WindowSettingManager());
 
-		JPanel pnlLeft = new JPanel();
-		JPanel pnlLeftTop = new JPanel();
-		JPanel pnlLeftTopCenter = new JPanel(new GridLayout(1, 2));
-		JPanel pnlLeftTopRight = new JPanel(new GridLayout(1, 1));
-		JPanel pnlLeftCenter = new JPanel();
-		JPanel pnlLeftBottom = new JPanel();
-		JPanel pnlBottom = new JPanel();
-		JPanel pnlRight = new JPanel();
-		tblItems = new JTable(new ListTableModel<TrainerItem>((AbstractListModel<TrainerItem>) getModel()));
+		final JPanel pnlLeft = new JPanel();
+		final JPanel pnlLeftTop = new JPanel();
+		final JPanel pnlLeftTopCenter = new JPanel(new GridLayout(1, 2));
+		final JPanel pnlLeftTopRight = new JPanel(new GridLayout(1, 1));
+		final JPanel pnlLeftCenter = new JPanel();
+		final JPanel pnlLeftBottom = new JPanel();
+		final JPanel pnlBottom = new JPanel();
+		final JPanel pnlRight = new JPanel();
+		tblItems = new JTable(new ListTableModel<>((AbstractListModel<TrainerItem>) getModel()));
 		txtItemFilter = new JTextField();
 		lblItemFilterClear = new JLabel(Icons.CLEAR.getImageIcon());
 		inputAreas = createInputAreas(getInputs());
@@ -164,9 +153,10 @@ public class MainWindow extends JFrame {
 		btnFileOpen = new JButton(Messages.getString("MainWindow.Load"), Icons.BUTTON_LOAD.getImageIcon()); //$NON-NLS-1$
 		btnFileSave = new JButton(Messages.getString("MainWindow.Save"), Icons.BUTTON_SAVE.getImageIcon()); //$NON-NLS-1$
 		btnTrainer = new JButton(Messages.getString("MainWindow.Train"), Icons.BUTTON_TRAINING.getImageIcon()); //$NON-NLS-1$
-		btnResetGewusst = new JButton(Messages.getString("MainWindow.MarkAsUnknown"), Icons.BUTTON_RESET.getImageIcon()); //$NON-NLS-1$
+		btnResetGewusst = new JButton(Messages.getString("MainWindow.MarkAsUnknown"), //$NON-NLS-1$
+				Icons.BUTTON_RESET.getImageIcon());
 		lblGewusst = new JLabel(String.format(Messages.getString("MainWindow.KnownText"), 0, 0, 0, 0)); //$NON-NLS-1$
-		JSplitPane splMain = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, true);
+		final JSplitPane splMain = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, true);
 
 		setLayout(new BorderLayout());
 		pnlLeft.setLayout(new BorderLayout());
@@ -202,8 +192,9 @@ public class MainWindow extends JFrame {
 		pnlLeftTopRight.add(btnMenu);
 		pnlLeftBottom.add(btnResetGewusst);
 		pnlLeftBottom.add(lblGewusst);
-		for (InputArea area : inputAreas)
+		for (final InputArea area : inputAreas) {
 			pnlRight.add(area);
+		}
 
 		createEmptyItem();
 		getModel().setHasChanges(false);
@@ -219,125 +210,92 @@ public class MainWindow extends JFrame {
 		lblItemFilterClear.setEnabled(false);
 		lblItemFilterClear.addMouseListener(new MouseAdapter() {
 			@Override
-			public void mouseClicked(MouseEvent e) {
+			public void mouseClicked(final MouseEvent e) {
 				txtItemFilter.setText(""); //$NON-NLS-1$
 				txtItemFilter.requestFocus();
 			}
 		});
 
 		// Handler
-		btnAddData.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				createEmptyItem();
-				inputAreas[0].requestFocus();
-			}
+		btnAddData.addActionListener(arg0 -> {
+			createEmptyItem();
+			inputAreas[0].requestFocus();
 		});
-		btnRemoveData.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent event) {
-				doRemoveSelectedItem();
-			}
-		});
-		btnMenu.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent event) {
-				doShowMenu(btnMenu);
-			}
-		});
-		btnResetGewusst.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				getModel().resetKnown();
-				tblItems.repaint();
-			}
+		btnRemoveData.addActionListener(event -> doRemoveSelectedItem());
+		btnMenu.addActionListener(event -> doShowMenu(btnMenu));
+		btnResetGewusst.addActionListener(arg0 -> {
+			getModel().resetKnown();
+			tblItems.repaint();
 		});
 		txtItemFilter.getDocument().addDocumentListener(new SimpleDocumentListener() {
 			@Override
-			public void textChanged(DocumentEvent e) {
+			public void textChanged(final DocumentEvent e) {
 				lblItemFilterClear.setEnabled(txtItemFilter.getText().length() > 0);
 				setTrainerItemFilter(txtItemFilter.getText());
 			}
 		});
-		tblItems.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
-			@Override
-			public void valueChanged(ListSelectionEvent e) {
-				if (getModel().size() == 0)
-					return;
-				if (!e.getValueIsAdjusting())
-					updateUiFromTrainerItem();
+		tblItems.getSelectionModel().addListSelectionListener(e -> {
+			if (getModel().size() == 0) {
+				return;
+			}
+			if (!e.getValueIsAdjusting()) {
+				updateUiFromTrainerItem();
 			}
 		});
 		// lstKarten.addListSelectionListener();
-		btnFileSave.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent event) {
-				doSaveModelAction();
-			}
-		});
-		btnFileOpen.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent event) {
-				doLoadModelAction();
-			}
-		});
-		btnTrainer.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				doStartTrainer();
-			}
-		});
+		btnFileSave.addActionListener(event -> doSaveModelAction());
+		btnFileOpen.addActionListener(event -> doLoadModelAction());
+		btnTrainer.addActionListener(e -> doStartTrainer());
 		final DocumentListener kartenSaver = new SimpleDocumentListener() {
 			@Override
-			public void textChanged(DocumentEvent e) {
+			public void textChanged(final DocumentEvent e) {
 				updateTrainerItemFromUi();
 			}
 		};
 		for (int i = 0; i < inputAreas.length; ++i) {
 			final int index = i;
 			inputAreas[i].addDocumentListener(kartenSaver);
-			inputAreas[i].addActionListener(new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent e) {
-					getCurrentItem().setKnown(index, inputAreas[index].isChecked());
-					tblItems.repaint();
-				}
+			inputAreas[i].addActionListener(e -> {
+				getCurrentItem().setKnown(index, inputAreas[index].isChecked());
+				tblItems.repaint();
 			});
 		}
 	}
 
 	private final ListDataListener modelListener = new ListDataListener() {
 		@Override
-		public void intervalRemoved(ListDataEvent e) {
+		public void intervalRemoved(final ListDataEvent e) {
 			contentsChanged(e);
 		}
 
 		@Override
-		public void intervalAdded(ListDataEvent e) {
+		public void intervalAdded(final ListDataEvent e) {
 			contentsChanged(e);
 		}
 
 		@Override
-		public void contentsChanged(ListDataEvent e) {
+		public void contentsChanged(final ListDataEvent e) {
 			updateKnownLabel();
 		}
 	};
 
 	@SuppressWarnings("unchecked")
-	private void setModel(TrainerModel<?> model) {
+	private void setModel(final TrainerModel<?> model) {
 		// TODO Listener h�bsch machen
-		if (model != null && model instanceof AbstractListModel)
+		if (model != null && model instanceof AbstractListModel) {
 			((AbstractListModel<?>) model).removeListDataListener(modelListener);
+		}
 		removedItems.clear();
 		setTrainerItemFilter(""); //$NON-NLS-1$
 		this.model = model;
 		if (tblItems != null) {
-			tblItems.setModel(new ListTableModel<TrainerItem>((AbstractListModel<TrainerItem>) model));
+			tblItems.setModel(new ListTableModel<>((AbstractListModel<TrainerItem>) model));
 			resetTableCellRenderer();
 			setSelectedModelIndex(0);
 		}
-		if (model instanceof AbstractListModel)
+		if (model instanceof AbstractListModel) {
 			((AbstractListModel<?>) model).addListDataListener(modelListener);
+		}
 		updateKnownLabel();
 	}
 
@@ -347,7 +305,7 @@ public class MainWindow extends JFrame {
 
 	private void resetTableCellRenderer() {
 		if (tblItems != null) {
-			TableColumn column = tblItems.getColumnModel().getColumn(0);
+			final TableColumn column = tblItems.getColumnModel().getColumn(0);
 			column.setCellRenderer(new ColoredTableCellRenderer());
 		}
 	}
@@ -357,14 +315,13 @@ public class MainWindow extends JFrame {
 	}
 
 	private void createEmptyItem() {
-		String[] values = new String[inputAreas.length];
-		for (int i = 0; i < values.length; ++i)
-			values[i] = ""; //$NON-NLS-1$
-		int index = getModel().addItem(values);
+		final String[] values = new String[inputAreas.length];
+		Arrays.fill(values, "");
+		final int index = getModel().addItem(values);
 		setSelectedModelIndex(toListIndex(index));
 	}
 
-	private void setValues(TrainerItem item) {
+	private void setValues(final TrainerItem item) {
 		for (int i = 0; i < item.getValues().length; ++i) {
 			inputAreas[i].setText(item.getValues()[i]);
 			inputAreas[i].setChecked(item.isKnown(i));
@@ -372,16 +329,16 @@ public class MainWindow extends JFrame {
 	}
 
 	private TrainerItem getCurrentItem() {
-		if (getModel().size() == 0)
+		if (getModel().size() == 0) {
 			return null;
-		else
-			return getModel().get(getSelectedModelIndex());
+		}
+		return getModel().get(getSelectedModelIndex());
 	}
 
 	private void updateTrainerItemFromUi() {
 		synchronized (listUpdate_mutex) {
 			if (!updatingList) {
-				TrainerItem item = getCurrentItem();
+				final TrainerItem item = getCurrentItem();
 				for (int i = 0; i < inputAreas.length; ++i) {
 					item.setValue(i, inputAreas[i].getText());
 				}
@@ -394,7 +351,7 @@ public class MainWindow extends JFrame {
 		try {
 			synchronized (listUpdate_mutex) {
 				updatingList = true;
-				TrainerItem item = getCurrentItem();
+				final TrainerItem item = getCurrentItem();
 				if (item != null) {
 					setValues(item);
 					tblItems.scrollRectToVisible(new Rectangle(0, tblItems.getSelectedRow() * tblItems.getRowHeight(),
@@ -402,24 +359,27 @@ public class MainWindow extends JFrame {
 				}
 				updatingList = false;
 			}
-		} catch (Exception ex) {
+		} catch (final Exception ex) {
 		}
 	}
 
 	private void updateKnownLabel() {
-		if (lblGewusst != null)
-			lblGewusst.setText(String.format(Messages.getString("MainWindow.KnownText"), getModel().countKnownItems(),//$NON-NLS-1$
-					getModel().size(), getModel().countKnownItemInputs(), (getModel().size() * getInputs().length)));
+		if (lblGewusst != null) {
+			lblGewusst.setText(String.format(Messages.getString("MainWindow.KnownText"), getModel().countKnownItems(), //$NON-NLS-1$
+					getModel().size(), getModel().countKnownItemInputs(), getModel().size() * getInputs().length));
+		}
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private void setTrainerItemFilter(String filter) {
-		if (filter == null)
+		if (filter == null) {
 			filter = ""; //$NON-NLS-1$
+		}
 		if (txtItemFilter != null && txtItemFilter.isDisplayable()) {
-			if (!txtItemFilter.getText().equals(filter))
+			if (!txtItemFilter.getText().equals(filter)) {
 				txtItemFilter.setText(filter);
-			TableRowSorter<ListTableModel<TrainerItem>> sorter = (TableRowSorter<ListTableModel<TrainerItem>>) tblItems
+			}
+			final TableRowSorter<ListTableModel<TrainerItem>> sorter = (TableRowSorter<ListTableModel<TrainerItem>>) tblItems
 					.getRowSorter();
 			if (filter.trim().length() > 0) {
 				sorter.setRowFilter((RowFilter) new CollatorTrainerItemFilter(getInputs(), filter));
@@ -432,20 +392,21 @@ public class MainWindow extends JFrame {
 	private void initFileChooserDialog() {
 		fc.setMultiSelectionEnabled(false);
 		fc.addChoosableFileFilter(WriteMode.getAllSupportedFilesFilter());
-		for (WriteMode mode : WriteMode.values())
+		for (final WriteMode mode : WriteMode.values()) {
 			fc.addChoosableFileFilter(mode.getFileChooseFileFilter());
+		}
 		fc.setFileFilter(WriteMode.getAllSupportedFilesFilter());
 	}
 
-	private void setSelectedModelIndex(int index) {
+	private void setSelectedModelIndex(final int index) {
 		tblItems.getSelectionModel().setSelectionInterval(index, index);
 	}
 
-	private int toModelIndex(int listIndex) {
+	private int toModelIndex(final int listIndex) {
 		return tblItems.getRowSorter().convertRowIndexToModel(listIndex);
 	}
 
-	private int toListIndex(int modelIndex) {
+	private int toListIndex(final int modelIndex) {
 		return tblItems.getRowSorter().convertRowIndexToView(modelIndex);
 	}
 
@@ -455,14 +416,15 @@ public class MainWindow extends JFrame {
 
 	private void doRemoveSelectedItem() {
 		int selectedLine = tblItems.getSelectedRow();
-		int index = getSelectedModelIndex();
-		TrainerItem removedItem = getModel().remove(index);
+		final int index = getSelectedModelIndex();
+		final TrainerItem removedItem = getModel().remove(index);
 		if (getModel().size() == 0) {
 			txtItemFilter.setText(""); //$NON-NLS-1$
 			createEmptyItem();
 		} else {
-			if (selectedLine >= tblItems.getRowSorter().getViewRowCount())
+			if (selectedLine >= tblItems.getRowSorter().getViewRowCount()) {
 				--selectedLine;
+			}
 			setSelectedModelIndex(selectedLine);
 		}
 		if (!removedItem.isEmpty()) {
@@ -476,22 +438,22 @@ public class MainWindow extends JFrame {
 		if (fc.showSaveDialog(window) == JFileChooser.APPROVE_OPTION) {
 			File file = fc.getSelectedFile();
 			WriteMode mode = WriteMode.getMode(fc.getFileFilter());
-			if (mode == null)
+			if (mode == null) {
 				mode = WriteMode.getMode(file);
-			if (mode == null)
+			}
+			if (mode == null) {
 				mode = WriteMode.XML;
+			}
 			if (!mode.appliesToExtensionOf(file)) {
 				file = new File(file.getParentFile(), file.getName() + "." + mode.getExtension()); //$NON-NLS-1$
 			}
-			if (file.exists()) {
-				if (!ONUtils.showQuestion(Messages.getString("MainWindow.FileAlreadyExists"))) { //$NON-NLS-1$
-					return;
-				}
+			if (file.exists() && !ONUtils.showQuestion(Messages.getString("MainWindow.FileAlreadyExists"))) { //$NON-NLS-1$
+				return;
 			}
 			try {
 				TrainerModelProvider.getInstance().saveModel(getModel(), file, mode);
 				getModel().setHasChanges(false);
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				e.printStackTrace();
 				ONUtils.showError(e);
 			}
@@ -501,15 +463,16 @@ public class MainWindow extends JFrame {
 	private void doLoadModelAction() {
 		fc.setSelectedFile(new File("")); //$NON-NLS-1$
 		if (fc.showOpenDialog(window) == JFileChooser.APPROVE_OPTION) {
-			File file = fc.getSelectedFile();
+			final File file = fc.getSelectedFile();
 			WriteMode mode = WriteMode.getMode(fc.getFileFilter());
-			if (mode == null)
+			if (mode == null) {
 				mode = WriteMode.getMode(file);
+			}
 			TrainerModel<?> model;
 			try {
 				model = TrainerModelProvider.getInstance().loadModel(file, mode);
 				model.setHasChanges(false);
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				ONUtils.showError(e);
 				model = TrainerModelProvider.getInstance().getDefaultModel();
 			}
@@ -520,11 +483,12 @@ public class MainWindow extends JFrame {
 	}
 
 	private void doStartTrainer() {
-		QuestionItem question = getModel().randomQuestionItem();
-		if (question != null)
+		final QuestionItem question = getModel().randomQuestionItem();
+		if (question != null) {
 			TrainerWindow.showWindow(this, question, this.settings.isShowCaptions());
-		else
+		} else {
 			ONUtils.showError("Nothing to train...");
+		}
 	}
 
 	private void doPrintAction() {
@@ -536,43 +500,29 @@ public class MainWindow extends JFrame {
 		dispose();
 	}
 
-	private void doShowMenu(JComponent anchor) {
-		JPopupMenu menu = new JPopupMenu();
+	private void doShowMenu(final JComponent anchor) {
+		final JPopupMenu menu = new JPopupMenu();
 
 		// undo
-		JMenu undo = new JMenu(Messages.getString("MainWindow.UndoDelete")); //$NON-NLS-1$
-		for (JMenuItem item : removedItems.createMenuItems()) {
+		final JMenu undo = new JMenu(Messages.getString("MainWindow.UndoDelete")); //$NON-NLS-1$
+		for (final JMenuItem item : removedItems.createMenuItems()) {
 			undo.add(item);
 		}
 
 		// printing
-		JMenuItem print = createMenuItem(Icons.PRINT.getImageIcon(),
-				Messages.getString("MainWindow.Print"), new ActionListener() { //$NON-NLS-1$
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				doPrintAction();
-			}
-		});
+		final JMenuItem print = createMenuItem(Icons.PRINT.getImageIcon(), Messages.getString("MainWindow.Print"), //$NON-NLS-1$
+				e -> doPrintAction());
 		print.setEnabled(false);
 		// settings
-		JMenuItem settings = createMenuItem(null, Messages.getString("MainWindow.Settings"), null); //$NON-NLS-1$
+		final JMenuItem settings = createMenuItem(null, Messages.getString("MainWindow.Settings"), null); //$NON-NLS-1$
 		settings.setEnabled(false);
 
 		// Groups
-		JMenuItem groups = createMenuItem(null, "Organize groups", new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				GroupWindow.showWindow(MainWindow.this, model);
-			}
-		});
+		final JMenuItem groups = createMenuItem(null, "Organize groups",
+				e -> GroupWindow.showWindow(MainWindow.this, model));
 
 		// exit
-		JMenuItem end = createMenuItem(null, Messages.getString("MainWindow.Exit"), new ActionListener() { //$NON-NLS-1$
-			@Override
-			public void actionPerformed(ActionEvent event) {
-				hideWindow();
-			}
-		});
+		final JMenuItem end = createMenuItem(null, Messages.getString("MainWindow.Exit"), event -> hideWindow());
 
 		menu.add(undo);
 		menu.add(new JSeparator());
@@ -584,16 +534,17 @@ public class MainWindow extends JFrame {
 		menu.show(anchor, 0, anchor.getHeight());
 	}
 
-	private static JMenuItem createMenuItem(Icon icon, String text, ActionListener al) {
-		JMenuItem item = new JMenuItem(text, icon);
-		if (al != null)
+	private static JMenuItem createMenuItem(final Icon icon, final String text, final ActionListener al) {
+		final JMenuItem item = new JMenuItem(text, icon);
+		if (al != null) {
 			item.addActionListener(al);
+		}
 		return item;
 	}
 
 	private class TrainerWindowListener extends WindowAdapter {
 		@Override
-		public void windowClosing(WindowEvent e) {
+		public void windowClosing(final WindowEvent e) {
 			if (!getModel().hasChanges() || ONUtils.showQuestion(Messages.getString("MainWindow.UnsavedChanges"))) { //$NON-NLS-1$
 				doShutdown();
 			}
@@ -602,22 +553,22 @@ public class MainWindow extends JFrame {
 
 	private class WindowSettingManager extends WindowAdapter {
 		@Override
-		public void windowClosing(WindowEvent e) {
+		public void windowClosing(final WindowEvent e) {
 			windowSettings.fileChooserPath = fc.getCurrentDirectory().getAbsolutePath();
 			ONUtils.saveSettings(windowSettings);
 		}
 
 		@Override
-		public void windowClosed(WindowEvent arg0) {
+		public void windowClosed(final WindowEvent arg0) {
 			System.exit(0);
 		}
 
 		@Override
-		public void windowOpened(WindowEvent e) {
+		public void windowOpened(final WindowEvent e) {
 			ONUtils.loadSettings(windowSettings);
 			try {
 				fc.setCurrentDirectory(new File(windowSettings.fileChooserPath));
-			} catch (Exception ex) {
+			} catch (final Exception ex) {
 			}
 		}
 	}

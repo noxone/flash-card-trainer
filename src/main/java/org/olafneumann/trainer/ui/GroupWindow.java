@@ -3,8 +3,6 @@ package org.olafneumann.trainer.ui;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.List;
@@ -33,38 +31,27 @@ class GroupWindow extends JDialog {
 
 	public static synchronized void showWindow(final JFrame owner, final TrainerModel<?> model) {
 		if (window == null) {
-			SwingUtilities.invokeLater(new Runnable() {
-				@Override
-				public void run() {
-					window = new GroupWindow(owner, model);
-					window.setVisible(true);
-				}
+			SwingUtilities.invokeLater(() -> {
+				window = new GroupWindow(owner, model);
+				window.setVisible(true);
 			});
 		} else {
-			SwingUtilities.invokeLater(new Runnable() {
-				@Override
-				public void run() {
-					window.requestFocus();
-				}
-			});
+			SwingUtilities.invokeLater(() -> window.requestFocus());
 		}
 	}
 
 	public static synchronized void hideWindow() {
 		if (window != null) {
-			SwingUtilities.invokeLater(new Runnable() {
-				@Override
-				public void run() {
-					window.setVisible(false);
-					window.dispose();
-					window = null;
-				}
+			SwingUtilities.invokeLater(() -> {
+				window.setVisible(false);
+				window.dispose();
+				window = null;
 			});
 		}
 	}
 
-	private JList<TrainerItemGroup<?>> lstGroups;
-	private JList<? extends TrainerItem> lstItems;
+	private final JList<TrainerItemGroup<?>> lstGroups;
+	private final JList<? extends TrainerItem> lstItems;
 
 	@SuppressWarnings("unchecked")
 	private GroupWindow(final JFrame owner, @SuppressWarnings("rawtypes") final TrainerModel model) {
@@ -77,40 +64,40 @@ class GroupWindow extends JDialog {
 		setMinimumSize(new Dimension(600, 400));
 		addWindowListener(new WindowAdapter() {
 			@Override
-			public void windowClosed(WindowEvent e) {
+			public void windowClosed(final WindowEvent e) {
 				hideWindow();
 			}
 		});
 
-		lstGroups = new JList<TrainerItemGroup<?>>(new GroupListModel(model.getGroups()));
+		lstGroups = new JList<>(new GroupListModel(model.getGroups()));
 		lstGroups.setMinimumSize(new Dimension(250, 300));
-		JPanel pnlLeftBottom = new JPanel(new GridLayout(1, 2));
-		JButton btnAddGroup = new JButton("add");
-		JButton btnRemoveGroup = new JButton("remove");
+		final JPanel pnlLeftBottom = new JPanel(new GridLayout(1, 2));
+		final JButton btnAddGroup = new JButton("add");
+		final JButton btnRemoveGroup = new JButton("remove");
 		pnlLeftBottom.add(btnAddGroup);
 		pnlLeftBottom.add(btnRemoveGroup);
-		JPanel pnlLeft = new JPanel(new BorderLayout());
+		final JPanel pnlLeft = new JPanel(new BorderLayout());
 		pnlLeft.add(new JScrollPane(lstGroups), BorderLayout.CENTER);
 		pnlLeft.add(pnlLeftBottom, BorderLayout.SOUTH);
 
-		lstItems = new JList<TrainerItem>(new ItemListModel<TrainerItem>(model.getItems()));
+		lstItems = new JList<>(new ItemListModel<TrainerItem>(model.getItems()));
 		lstItems.setMinimumSize(new Dimension(250, 300));
 		lstItems.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-		JPanel pnlRight = new JPanel(new BorderLayout());
+		final JPanel pnlRight = new JPanel(new BorderLayout());
 		pnlRight.add(new JScrollPane(lstItems), BorderLayout.CENTER);
 
-		JPanel pnlButtons = new JPanel(new GridLayout(4, 1));
-		JButton btnAdd = new JButton("Add");
-		JButton btnRemove = new JButton("Remove");
-		JButton btnAddAll = new JButton("Add all");
-		JButton btnRemoveAll = new JButton("Remove all");
+		final JPanel pnlButtons = new JPanel(new GridLayout(4, 1));
+		final JButton btnAdd = new JButton("Add");
+		final JButton btnRemove = new JButton("Remove");
+		final JButton btnAddAll = new JButton("Add all");
+		final JButton btnRemoveAll = new JButton("Remove all");
 		pnlButtons.add(btnAdd);
 		pnlButtons.add(btnRemove);
 		pnlButtons.add(btnAddAll);
 		pnlButtons.add(btnRemoveAll);
 
-		JButton btnOK = new JButton("OK");
-		JPanel pnlSouth = new JPanel(new GridLayout(1, 2));
+		final JButton btnOK = new JButton("OK");
+		final JPanel pnlSouth = new JPanel(new GridLayout(1, 2));
 		pnlSouth.add(Box.createGlue());
 		pnlSouth.add(btnOK);
 
@@ -120,21 +107,13 @@ class GroupWindow extends JDialog {
 		add(pnlRight, BorderLayout.EAST);
 		add(pnlSouth, BorderLayout.SOUTH);
 
-		btnOK.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				hideWindow();
-			}
-		});
-		btnAddGroup.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				String n = JOptionPane.showInputDialog("Name");
-				BeanTrainerItemGroup group = new BeanTrainerItemGroup();
-				group.setName(n);
-				model.getGroups().add(group);
-				lstGroups.updateUI();
-			}
+		btnOK.addActionListener(e -> hideWindow());
+		btnAddGroup.addActionListener(e -> {
+			final String n = JOptionPane.showInputDialog("Name");
+			final BeanTrainerItemGroup group = new BeanTrainerItemGroup();
+			group.setName(n);
+			model.getGroups().add(group);
+			lstGroups.updateUI();
 		});
 
 		doEnablingDisabling();
@@ -151,7 +130,7 @@ class GroupWindow extends JDialog {
 		private final List<TrainerItemGroup<?>> items;
 
 		@SuppressWarnings("unchecked")
-		public GroupListModel(List<?> groups) {
+		public GroupListModel(final List<?> groups) {
 			this.items = (List<TrainerItemGroup<?>>) groups;
 		}
 
@@ -161,7 +140,7 @@ class GroupWindow extends JDialog {
 		}
 
 		@Override
-		public TrainerItemGroup<?> getElementAt(int index) {
+		public TrainerItemGroup<?> getElementAt(final int index) {
 			return items.get(index);
 		}
 	}
@@ -171,7 +150,7 @@ class GroupWindow extends JDialog {
 
 		private final List<I> items;
 
-		public ItemListModel(List<I> items) {
+		public ItemListModel(final List<I> items) {
 			this.items = items;
 		}
 
@@ -181,7 +160,7 @@ class GroupWindow extends JDialog {
 		}
 
 		@Override
-		public I getElementAt(int index) {
+		public I getElementAt(final int index) {
 			return items.get(index);
 		}
 	}

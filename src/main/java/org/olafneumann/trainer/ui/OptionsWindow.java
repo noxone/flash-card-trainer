@@ -20,64 +20,54 @@ public class OptionsWindow extends JDialog {
 	public static synchronized void showWindow(final JFrame owner, final Settings settings,
 			final DefaultTrainerModelInput[] inputs) {
 		if (window == null) {
-			SwingUtilities.invokeLater(new Runnable() {
-				@Override
-				public void run() {
-					window = new OptionsWindow(owner, settings, inputs);
-					window.setVisible(true);
-				}
+			SwingUtilities.invokeLater(() -> {
+				window = new OptionsWindow(owner, settings, inputs);
+				window.setVisible(true);
 			});
 		} else {
-			SwingUtilities.invokeLater(new Runnable() {
-				@Override
-				public void run() {
-					window.requestFocus();
-				}
-			});
+			SwingUtilities.invokeLater(() -> window.requestFocus());
 		}
 	}
 
 	public static synchronized void hideWindow() {
 		if (window != null) {
-			SwingUtilities.invokeLater(new Runnable() {
-				@Override
-				public void run() {
-					window.setVisible(false);
-					window.dispose();
-					window = null;
-				}
+			SwingUtilities.invokeLater(() -> {
+				window.setVisible(false);
+				window.dispose();
+				window = null;
 			});
 		}
 	}
 
-	private static JPanel createInputPanel(DefaultTrainerModelInput input) {
+	private static JPanel createInputPanel(final DefaultTrainerModelInput input) {
 		return new JPanel();
 	}
 
-	public OptionsWindow(JFrame owner, Settings settings, DefaultTrainerModelInput[] inputs) {
+	public OptionsWindow(final JFrame owner, final Settings settings, final DefaultTrainerModelInput[] inputs) {
 		super(owner);
 		setTitle("Options");
-		/*setAutoRequestFocus(true);*/
+		/* setAutoRequestFocus(true); */
 		setLayout(new BorderLayout());
 
-		JTabbedPane tbpMain = new JTabbedPane();
+		final JTabbedPane tbpMain = new JTabbedPane();
 		add(tbpMain, BorderLayout.CENTER);
 
 		// Main
-		JPanel pnlMain = new JPanel();
+		final JPanel pnlMain = new JPanel();
 		tbpMain.add("Main", pnlMain);
 
 		// inputs
-		for (DefaultTrainerModelInput input : inputs)
+		for (final DefaultTrainerModelInput input : inputs) {
 			tbpMain.add(input.getName(), createInputPanel(input));
+		}
 
 		// buttons
-		JButton btnOK = new JButton("OK");
-		JButton btnCancel = new JButton("Cancel");
-		JPanel pnlButtons = new JPanel(new GridLayout(1, 2));
+		final JButton btnOK = new JButton("OK");
+		final JButton btnCancel = new JButton("Cancel");
+		final JPanel pnlButtons = new JPanel(new GridLayout(1, 2));
 		pnlButtons.add(btnCancel);
 		pnlButtons.add(btnOK);
-		JPanel pnlBottom = new JPanel(new BorderLayout());
+		final JPanel pnlBottom = new JPanel(new BorderLayout());
 		pnlBottom.add(pnlButtons, BorderLayout.EAST);
 		add(pnlBottom, BorderLayout.SOUTH);
 

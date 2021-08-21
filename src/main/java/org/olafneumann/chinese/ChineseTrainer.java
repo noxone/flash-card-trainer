@@ -7,7 +7,7 @@ import org.olafneumann.trainer.data.BeanTrainerModel;
 import org.olafneumann.trainer.data.TrainerModel;
 
 public class ChineseTrainer extends Trainer<BeanTrainerItem, BeanTrainerModel> {
-	public static void main(String[] args) {
+	public static void main(final String[] args) {
 		new ChineseTrainer().startApplication(getFileFromArguments(args));
 	}
 
@@ -22,12 +22,7 @@ public class ChineseTrainer extends Trainer<BeanTrainerItem, BeanTrainerModel> {
 	}
 
 	@Override
-	protected void startUi(Settings settings, TrainerModel<?> model) {
-		//		try {
-		//			Class.forName("javafx.application.Application");
-		//			org.olafneumann.trainer.uifx.MainWindow.showWindow(settings, model);
-		//		} catch (Exception e) {
+	protected void startUi(final Settings settings, final TrainerModel<?> model) {
 		super.startUi(settings, model);
-		//		}
 	}
 }

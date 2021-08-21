@@ -20,15 +20,15 @@ import org.olafneumann.trainer.data.TrainerModelInput;
 class InputArea extends JPanel implements UndoableEditListener {
 	private static final long serialVersionUID = -8977002175890800568L;
 
-	private JToggleButton tglKnown = new JToggleButton(Icons.CHECK_SMALL.getImageIcon());
-	private JLabel lblTitle = new JLabel();
-	private JTextArea txtInput = new JTextArea();
+	private final JToggleButton tglKnown = new JToggleButton(Icons.CHECK_SMALL.getImageIcon());
+	private final JLabel lblTitle = new JLabel();
+	private final JTextArea txtInput = new JTextArea();
 
 	private final UndoManager undo = new UndoManager();
 
-	public InputArea(TrainerModelInput input) {
+	public InputArea(final TrainerModelInput input) {
 		setLayout(new BorderLayout());
-		JPanel pnlNorth = new JPanel(new BorderLayout());
+		final JPanel pnlNorth = new JPanel(new BorderLayout());
 		((BorderLayout) pnlNorth.getLayout()).setHgap(10);
 		pnlNorth.add(tglKnown, BorderLayout.WEST);
 		pnlNorth.add(lblTitle, BorderLayout.CENTER);
@@ -41,27 +41,30 @@ class InputArea extends JPanel implements UndoableEditListener {
 		txtInput.setWrapStyleWord(true);
 		txtInput.enableInputMethods(true);
 		txtInput.setLocale(input.getLocale());
-		Document document = input.getDocument();
-		if (document != null)
+		final Document document = input.getDocument();
+		if (document != null) {
 			txtInput.setDocument(document);
-		// TODO Chinesische Eingabe aktivieren
+			// TODO Chinesische Eingabe aktivieren
+		}
 
 		txtInput.getDocument().addUndoableEditListener(this);
 		txtInput.addKeyListener(new KeyAdapter() {
 			@Override
-			public void keyPressed(KeyEvent evt) {
+			public void keyPressed(final KeyEvent evt) {
 				if ((evt.getModifiersEx() & KeyEvent.CTRL_DOWN_MASK) == KeyEvent.CTRL_DOWN_MASK) {
 					switch (evt.getKeyCode()) {
-						case KeyEvent.VK_Z:
-							if (undo.canUndo())
-								undo.undo();
-							break;
-						case KeyEvent.VK_Y:
-							if (undo.canRedo())
-								undo.redo();
-							break;
-						default:
-							// nothing
+					case KeyEvent.VK_Z:
+						if (undo.canUndo()) {
+							undo.undo();
+						}
+						break;
+					case KeyEvent.VK_Y:
+						if (undo.canRedo()) {
+							undo.redo();
+						}
+						break;
+					default:
+						// nothing
 					}
 				}
 			}
@@ -72,7 +75,7 @@ class InputArea extends JPanel implements UndoableEditListener {
 		return txtInput.getText();
 	}
 
-	public void setText(String text) {
+	public void setText(final String text) {
 		undo.discardAllEdits();
 		txtInput.setText(text);
 	}
@@ -81,7 +84,7 @@ class InputArea extends JPanel implements UndoableEditListener {
 		return lblTitle.getText();
 	}
 
-	public void setTitle(String title) {
+	public void setTitle(final String title) {
 		lblTitle.setText(title);
 	}
 
@@ -89,7 +92,7 @@ class InputArea extends JPanel implements UndoableEditListener {
 		return tglKnown.isSelected();
 	}
 
-	public void setChecked(boolean checked) {
+	public void setChecked(final boolean checked) {
 		tglKnown.setSelected(checked);
 	}
 
@@ -98,16 +101,16 @@ class InputArea extends JPanel implements UndoableEditListener {
 		txtInput.requestFocus();
 	}
 
-	void addDocumentListener(DocumentListener listener) {
+	void addDocumentListener(final DocumentListener listener) {
 		txtInput.getDocument().addDocumentListener(listener);
 	}
 
-	void addActionListener(ActionListener listener) {
+	void addActionListener(final ActionListener listener) {
 		tglKnown.addActionListener(listener);
 	}
 
 	@Override
-	public void undoableEditHappened(UndoableEditEvent editEvent) {
+	public void undoableEditHappened(final UndoableEditEvent editEvent) {
 		undo.addEdit(editEvent.getEdit());
-	}	
+	}
 }

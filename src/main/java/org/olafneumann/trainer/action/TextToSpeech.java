@@ -11,7 +11,7 @@ public enum TextToSpeech {
 
 	private final TextToSpeechProvider textToSpeech;
 
-	private TextToSpeech(TextToSpeechProvider textToSpeech) {
+	TextToSpeech(final TextToSpeechProvider textToSpeech) {
 		this.textToSpeech = textToSpeech;
 	}
 
@@ -19,12 +19,12 @@ public enum TextToSpeech {
 		return textToSpeech;
 	}
 
-	static void playMp3(InputStream in) {
+	static void playMp3(final InputStream in) {
 		Player player = null;
 		try {
 			player = new Player(in);
 			player.play();
-		} catch (JavaLayerException e1) {
+		} catch (final JavaLayerException e1) {
 			e1.printStackTrace();
 		} finally {
 			if (player != null) {

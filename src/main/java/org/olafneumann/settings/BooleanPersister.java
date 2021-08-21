@@ -6,13 +6,13 @@ import org.jdom2.Element;
 
 class BooleanPersister implements SettingsPersister<Boolean> {
 	@Override
-	public boolean save(Saver saver, Element xml,Type type, Boolean object) {
+	public boolean save(final Saver saver, final Element xml, final Type type, final Boolean object) {
 		xml.setText(object.toString());
 		return true;
 	}
 
 	@Override
-	public Boolean load(Loader loader, Element xml, Type type) {
+	public Boolean load(final Loader loader, final Element xml, final Type type) {
 		return Boolean.parseBoolean(xml.getText());
 	}
 

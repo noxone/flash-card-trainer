@@ -22,25 +22,26 @@ import org.olafneumann.trainer.data.TrainerModelProvider;
 import org.olafneumann.trainer.ui.MainWindow;
 import org.olafneumann.trainer.ui.ONUtils;
 
-public abstract class Trainer<I extends TrainerItem, M extends TrainerModel<I>> implements
-TrainerDefaultModelProvider<M>, TypeProvider {
+public abstract class Trainer<I extends TrainerItem, M extends TrainerModel<I>>
+		implements TrainerDefaultModelProvider<M>, TypeProvider {
 	private static final String DEFAULT_PROPERTIES_FILENAME = "configuration.properties";
 
-	protected static final File getFileFromArguments(String[] args) {
+	protected static final File getFileFromArguments(final String[] args) {
 		File file = null;
 		if (args.length > 0) {
 			file = new File(args[0]);
-			if (!file.exists())
+			if (!file.exists()) {
 				file = null;
+			}
 		}
 		return file;
 	}
 
-	protected void startApplication(File file) {
+	protected void startApplication(final File file) {
 		// Window-Style ändern
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-		} catch (Exception e) {
+		} catch (final Exception e) {
 		}
 
 		// letzte Maßnahmen beim Beenden
@@ -52,12 +53,12 @@ TrainerDefaultModelProvider<M>, TypeProvider {
 		});
 
 		// Einstellungen laden
-		Settings settings = new Settings();
+		final Settings settings = new Settings();
 		try {
-			Properties properties = createFinalApplicationProperties(getProperties());
+			final Properties properties = createFinalApplicationProperties(getProperties());
 			settings.load(properties);
 			initTrainerModelProvider(properties);
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			e.printStackTrace();
 			ONUtils.showError(e);
 			return;
@@ -68,18 +69,19 @@ TrainerDefaultModelProvider<M>, TypeProvider {
 		if (file != null && file.exists() && file.canRead()) {
 			try {
 				model = TrainerModelProvider.getInstance().loadModel(file, null);
-			} catch (Exception e) {
+			} catch (final Exception e) {
 			}
 		}
 		// Kein Modell geladen... wir nehmen das Default-Modell
-		if (model == null)
+		if (model == null) {
 			model = TrainerModelProvider.getInstance().getDefaultModel();
+		}
 
 		// Fenster anzeigen
 		startUi(settings, model);
 	}
 
-	protected void startUi(Settings settings, TrainerModel<?> model) {
+	protected void startUi(final Settings settings, final TrainerModel<?> model) {
 		MainWindow.showWindow(settings, model);
 	}
 
@@ -92,15 +94,15 @@ TrainerDefaultModelProvider<M>, TypeProvider {
 	}
 
 	protected InputStream getApplicationPropertiesInputStream() throws IOException {
-		File configurationFile = new File(getClass().getSimpleName() + ".config");
+		final File configurationFile = new File(getClass().getSimpleName() + ".config");
 		if (configurationFile.exists() && configurationFile.canRead()) {
 			return new BufferedInputStream(new FileInputStream(configurationFile));
 		}
 		return null;
 	}
 
-	protected Properties createFinalApplicationProperties(Properties properties) throws IOException {
-		InputStream pis = getApplicationPropertiesInputStream();
+	protected Properties createFinalApplicationProperties(final Properties properties) throws IOException {
+		final InputStream pis = getApplicationPropertiesInputStream();
 		if (pis != null) {
 			properties.load(pis);
 			pis.close();
@@ -108,7 +110,7 @@ TrainerDefaultModelProvider<M>, TypeProvider {
 		return properties;
 	}
 
-	protected void initTrainerModelProvider(Properties properties) {
+	protected void initTrainerModelProvider(final Properties properties) {
 		TrainerModelProvider.getInstance().setTrainerDefaultModelProvider(this);
 		TrainerModelProvider.getInstance().configure(getModelClass(),
 				TrainerModelInputProvider.readTrainerModelInputs(properties));
@@ -116,24 +118,22 @@ TrainerDefaultModelProvider<M>, TypeProvider {
 	}
 
 	private Properties getProperties() throws IOException {
-		InputStream in = getClass().getResourceAsStream(getPropertiesFilename());
-		try {
-			Properties properties = new Properties();
+		try (InputStream in = getClass().getResourceAsStream(getPropertiesFilename())) {
+			final Properties properties = new Properties();
 			properties.load(in);
 			return properties;
-		} finally {
-			in.close();
 		}
 	}
 
 	protected abstract Class<? extends TrainerModel<?>> getModelClass();
 
 	@Override
-	public Type getType(Element element) {
+	public Type getType(final Element element) {
 		if ("model".equals(element.getName()) && element.getParentElement().getParentElement() == null
 				&& "trainer".equals(element.getParentElement().getName())) {
 			return BeanTrainerModel.class;
-		} else if ("item".equals(element.getName()) && !element.getChildren("Model").isEmpty()
+		}
+		if ("item".equals(element.getName()) && !element.getChildren("Model").isEmpty()
 				&& !element.getChildren("Entries").isEmpty()) {
 			return BeanTrainerItem.class;
 		}

@@ -35,19 +35,20 @@ public enum Icons {
 	BUTTON_RESET("btnReset.png"), //$NON-NLS-1$
 	BUTTON_PRINT("btnPrint.png"), //$NON-NLS-1$
 	BUTTON_TRAINING("btnTraining.png"), //$NON-NLS-1$
-	BUTTON_BACK("btnBack.png"),//
+	BUTTON_BACK("btnBack.png"), //
 	BUTTON_FORWARD("btnForward.png"),//
 	;
 
 	private final ImageIcon icon;
-	private final List<Image> imageList = new ArrayList<Image>();
+	private final List<Image> imageList = new ArrayList<>();
 
-	private Icons(String filename) {
+	Icons(String filename) {
 		filename = "gfx/" + filename;
 		this.icon = loadImageIcon(filename);
 		imageList.addAll(loadImageList(filename));
-		if (imageList.isEmpty())
+		if (imageList.isEmpty()) {
 			imageList.add(icon.getImage());
+		}
 	}
 
 	public ImageIcon getImageIcon() {
@@ -62,13 +63,14 @@ public enum Icons {
 		return imageList;
 	}
 
-	private List<Image> loadImageList(String filename) {
-		List<Image> images = new ArrayList<Image>();
+	private List<Image> loadImageList(final String filename) {
+		final List<Image> images = new ArrayList<>();
 		String extension = filename;
-		if (extension.contains("."))
+		if (extension.contains(".")) {
 			extension = extension.substring(extension.lastIndexOf('.'));
-		else
+		} else {
 			extension = "";
+		}
 
 		String prefix = filename.substring(0, filename.length() - extension.length());
 
@@ -77,15 +79,15 @@ public enum Icons {
 				prefix = prefix.substring(0, prefix.length() - 1);
 			}
 			if (prefix.charAt(prefix.length() - 1) == '_') {
-				for (int size : new int[] { 16, 22, 32, 48, 64, 128, 256 }) {
-					String newFilename = prefix + size + extension;
+				for (final int size : new int[] { 16, 22, 32, 48, 64, 128, 256 }) {
+					final String newFilename = prefix + size + extension;
 					if (new File(newFilename).exists()) {
-						ImageIcon icon = loadImageIcon(newFilename);
+						final ImageIcon icon = loadImageIcon(newFilename);
 						try {
 							while (icon.getImageLoadStatus() == MediaTracker.LOADING) {
 								Thread.sleep(50);
 							}
-						} catch (Exception e) {
+						} catch (final Exception e) {
 							e.printStackTrace();
 						}
 						images.add(icon.getImage());
@@ -96,10 +98,10 @@ public enum Icons {
 		return images;
 	}
 
-	private static ImageIcon loadImageIcon(String filename) {
+	private static ImageIcon loadImageIcon(final String filename) {
 		try {
 			return new ImageIcon(Icons.class.getResource("/" + filename)); //$NON-NLS-1$
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			return new ImageIcon(filename);
 		}
 	}

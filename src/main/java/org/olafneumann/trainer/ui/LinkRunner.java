@@ -9,12 +9,11 @@ public class LinkRunner extends SwingWorker<Void, Void> {
 	static boolean isBrowsingSupported() {
 		if (!Desktop.isDesktopSupported()) {
 			return false;
-		} else {
-			return Desktop.getDesktop().isSupported(Desktop.Action.BROWSE);
 		}
+		return Desktop.getDesktop().isSupported(Desktop.Action.BROWSE);
 	}
 
-	public static void open(URI uri) {
+	public static void open(final URI uri) {
 		if (!isBrowsingSupported()) {
 			System.err.println(Messages.getString("LinkRunner.BrowsingNotSupported")); //$NON-NLS-1$
 			return;
@@ -24,7 +23,7 @@ public class LinkRunner extends SwingWorker<Void, Void> {
 
 	private final URI uri;
 
-	private LinkRunner(URI u) {
+	private LinkRunner(final URI u) {
 		if (u == null) {
 			throw new NullPointerException();
 		}
@@ -33,7 +32,7 @@ public class LinkRunner extends SwingWorker<Void, Void> {
 
 	@Override
 	protected Void doInBackground() throws Exception {
-		Desktop desktop = java.awt.Desktop.getDesktop();
+		final Desktop desktop = java.awt.Desktop.getDesktop();
 		desktop.browse(uri);
 		return null;
 	}
@@ -42,8 +41,7 @@ public class LinkRunner extends SwingWorker<Void, Void> {
 	protected void done() {
 		try {
 			get();
-		}
-		catch (Exception ee) {
+		} catch (final Exception ee) {
 			ONUtils.showError(ee);
 		}
 	}

@@ -17,7 +17,7 @@ public enum WriteMode {
 	private final String extension;
 	private final FileFilter filter = new WriteModeFileFilter();
 
-	private WriteMode(String text, String extension) {
+	WriteMode(final String text, final String extension) {
 		this.text = text;
 		this.extension = extension.toLowerCase();
 	}
@@ -34,14 +34,14 @@ public enum WriteMode {
 		return filter;
 	}
 
-	public boolean appliesToExtensionOf(File file) {
+	public boolean appliesToExtensionOf(final File file) {
 		return file.getName().toLowerCase().endsWith("." + extension);
 	}
 
 	private class WriteModeFileFilter extends FileFilter {
 		@Override
-		public boolean accept(File file) {
-			return file.isDirectory() || (file.isFile() && file.getName().toLowerCase().endsWith("." + extension));
+		public boolean accept(final File file) {
+			return file.isDirectory() || file.isFile() && file.getName().toLowerCase().endsWith("." + extension);
 		}
 
 		@Override
@@ -50,15 +50,16 @@ public enum WriteMode {
 		}
 	}
 
-	public static WriteMode getMode(FileFilter filter) {
-		for (WriteMode mode : values()) {
-			if (mode.filter == filter)
+	public static WriteMode getMode(final FileFilter filter) {
+		for (final WriteMode mode : values()) {
+			if (mode.filter == filter) {
 				return mode;
+			}
 		}
 		return null;
 	}
 
-	public static WriteMode getMode(File file) {
+	public static WriteMode getMode(final File file) {
 		String name = file.getName();
 		if (name.contains(".")) {
 			name = name.substring(name.indexOf(".") + 1);
@@ -68,9 +69,10 @@ public enum WriteMode {
 
 	public static WriteMode getMode(String extension) {
 		extension = extension.toLowerCase();
-		for (WriteMode mode : values()) {
-			if (mode.extension.equals(extension))
+		for (final WriteMode mode : values()) {
+			if (mode.extension.equals(extension)) {
 				return mode;
+			}
 		}
 		return null;
 	}
@@ -83,8 +85,8 @@ public enum WriteMode {
 
 	private static class AllSupportedFilesFileFilter extends FileFilter {
 		@Override
-		public boolean accept(File file) {
-			for (WriteMode mode : values()) {
+		public boolean accept(final File file) {
+			for (final WriteMode mode : values()) {
 				if (mode.getFileChooseFileFilter().accept(file)) {
 					return true;
 				}
@@ -94,9 +96,9 @@ public enum WriteMode {
 
 		@Override
 		public String getDescription() {
-			StringBuilder sb = new StringBuilder();
+			final StringBuilder sb = new StringBuilder();
 			sb.append("All supported file types (");
-			for (WriteMode mode : values()) {
+			for (final WriteMode mode : values()) {
 				sb.append("*.").append(mode.extension).append(", ");
 			}
 			sb.deleteCharAt(sb.length() - 1);

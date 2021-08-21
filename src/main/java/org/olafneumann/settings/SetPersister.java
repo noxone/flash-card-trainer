@@ -11,9 +11,10 @@ class SetPersister implements SettingsPersister<Set<?>> {
 	private static final String ITEM = "item";
 
 	@Override
-	public boolean save(Saver saver, Element xml,Type type, Set<?> object) throws SettingsException {
+	public boolean save(final Saver saver, final Element xml, final Type type, final Set<?> object)
+			throws SettingsException {
 		saver.setSaved(object);
-		for (Object item : object) {
+		for (final Object item : object) {
 			saver.saveXml(xml, item.getClass(), ITEM, item);
 		}
 		return true;
@@ -21,14 +22,15 @@ class SetPersister implements SettingsPersister<Set<?>> {
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override
-	public Set<?> load(Loader loader, Element xml, Type type) throws SettingsException {
-		Set set = new HashSet<Object>();
+	public Set<?> load(final Loader loader, final Element xml, final Type type) throws SettingsException {
+		final Set set = new HashSet<>();
 		loader.setLoaded(xml.getAttributeValue(ObjectRegistry.XML_ATTR_ID), set);
-		for (Element child : xml.getChildren(ITEM)) {
-			if (type instanceof ParameterizedType)
+		for (final Element child : xml.getChildren(ITEM)) {
+			if (type instanceof ParameterizedType) {
 				set.add(loader.loadXml(child, ((ParameterizedType) type).getActualTypeArguments()[0]));
-			else
+			} else {
 				set.add(loader.loadXml(child, Object.class));
+			}
 		}
 		return set;
 	}
@@ -38,16 +40,15 @@ class SetPersister implements SettingsPersister<Set<?>> {
 		return Set.class;
 	}
 
-	public static final TypeDescription TYPE_DESCRIPTION = new TypeDescription() {
-		@Override
-		public boolean appliesTo(Type type) {
-			if (type instanceof Class<?>)
-				return Set.class.isAssignableFrom((Class<?>) type);
-			else if (type instanceof ParameterizedType)
-				return appliesTo(((ParameterizedType) type).getRawType());
-			else
-				System.err.println("Unknown type: " + type + " - " + type.getClass().getName());
-			return false;
+	public static final TypeDescription TYPE_DESCRIPTION = type -> {
+		if (type instanceof Class<?>) {
+			return Set.class.isAssignableFrom((Class<?>) type);
 		}
+		if (type instanceof ParameterizedType) {
+			return SetPersister.TYPE_DESCRIPTION.appliesTo(((ParameterizedType) type).getRawType());
+		} else {
+			System.err.println("Unknown type: " + type + " - " + type.getClass().getName());
+		}
+		return false;
 	};
 }

@@ -15,7 +15,7 @@ public class TextToSpeechAction implements TrainerModelInputAction {
 	private final TextToSpeechProvider textToSpeech;
 	private final Pattern pattern;
 
-	public TextToSpeechAction(TextToSpeechProvider textToSpeech, Pattern pattern) {
+	public TextToSpeechAction(final TextToSpeechProvider textToSpeech, final Pattern pattern) {
 		this.textToSpeech = textToSpeech;
 		this.pattern = pattern;
 	}
@@ -31,19 +31,18 @@ public class TextToSpeechAction implements TrainerModelInputAction {
 	}
 
 	@Override
-	public List<String> getTexts(String inputText) {
-		if (pattern != null) {
-			List<String> texts = new ArrayList<String>();
-			Matcher matcher = pattern.matcher(inputText);
-			while (matcher.find()) {
-				for (int i = 0; i < matcher.groupCount(); ++i) {
-					texts.add(matcher.group(i + 1).trim());
-				}
-			}
-			return texts;
-		} else {
+	public List<String> getTexts(final String inputText) {
+		if (pattern == null) {
 			return null;
 		}
+		final List<String> texts = new ArrayList<>();
+		final Matcher matcher = pattern.matcher(inputText);
+		while (matcher.find()) {
+			for (int i = 0; i < matcher.groupCount(); ++i) {
+				texts.add(matcher.group(i + 1).trim());
+			}
+		}
+		return texts;
 	}
 
 	@Override

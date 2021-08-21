@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<chinese version="1.0">
+  <vocabulary>
+    <item>
+      <Foreign><![CDATA[Pferd]]></Foreign>
+      <Pinyin><![CDATA[mǎ]]></Pinyin>
+      <Chinese><![CDATA[马]]></Chinese>
+    </item>
+    <item>
+      <Foreign><![CDATA[Hanf]]></Foreign>
+      <Pinyin><![CDATA[má]]></Pinyin>
+      <Chinese><![CDATA[麻]]></Chinese>
+    </item>
+    <item>
+      <Foreign><![CDATA[Wald]]></Foreign>
+      <Pinyin><![CDATA[lín]]></Pinyin>
+      <Chinese><![CDATA[林]]></Chinese>
+    </item>
+  </vocabulary>
+</chinese>

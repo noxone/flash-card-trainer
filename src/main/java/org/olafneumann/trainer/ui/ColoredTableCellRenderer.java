@@ -26,7 +26,7 @@ class ColoredTableCellRenderer extends DefaultTableCellRenderer {
 			for (int i = 0; i < values.length; ++i) {
 				if (needSeparator)
 					sb.append(" / "); //$NON-NLS-1$
-				// TODO Schrift aus dem Input übernehmen
+				// TODO Schrift aus dem Input Ã¼bernehmen
 				if (item.isKnown(i))
 					++known;
 				sb.append(getSpanStart(null, item.isKnown(i) ? "green" : "red")); //$NON-NLS-1$ //$NON-NLS-2$

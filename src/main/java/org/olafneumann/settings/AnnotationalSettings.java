@@ -177,10 +177,10 @@ public class AnnotationalSettings {
 	}
 
 	/**
-	 * L‰dt Einstellungen der Version 1. Diese Zeichnen sich dadurch aus, dass s‰mtliche Informationen, die das Programm
+	 * L√§dt Einstellungen der Version 1. Diese Zeichnen sich dadurch aus, dass s√§mtliche Informationen, die das Programm
 	 * speichert, in einer einzigen XML-Datei abgelegt werden. Kann die XML-Datei am aus irgendeinem Grund nicht geladen
-	 * werden, weigert sich das gesamte Programm zu starten. Daher wurde Version 2 eingef¸hrt. Hier werden die Dateien
-	 * aufgeteilt, so dass das Programm immer f‰hig ist, zu laden, auch wenn in der History oder den Favouriten ein
+	 * werden, weigert sich das gesamte Programm zu starten. Daher wurde Version 2 eingef√ºhrt. Hier werden die Dateien
+	 * aufgeteilt, so dass das Programm immer f√§hig ist, zu laden, auch wenn in der History oder den Favouriten ein
 	 * Fehler vorliegt.
 	 * 
 	 * @param root

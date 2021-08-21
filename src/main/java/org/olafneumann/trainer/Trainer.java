@@ -37,13 +37,13 @@ TrainerDefaultModelProvider<M>, TypeProvider {
 	}
 
 	protected void startApplication(File file) {
-		// Window-Style ‰ndern
+		// Window-Style √§ndern
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		} catch (Exception e) {
 		}
 
-		// letzte Maﬂnahmen beim Beenden
+		// letzte Ma√ünahmen beim Beenden
 		Runtime.getRuntime().addShutdownHook(new Thread("Trainer Shutdown") {
 			@Override
 			public void run() {

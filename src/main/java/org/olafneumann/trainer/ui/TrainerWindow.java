@@ -116,13 +116,13 @@ class TrainerWindow extends JFrame implements QuestionItemListener {
 				case 'Q':
 				case '4':
 					hideWindow();
-					// System.out.println("ende im gelände");
+					// System.out.println("ende im gelÃ¤nde");
 					return true;
 				case 'h':
 				case 'H':
 				case '2':
 					setAnswerAreaVisibility(!areAnswersVisible());
-					// System.out.println("hölp!");
+					// System.out.println("help!");
 					return true;
 				default:
 					return false;

@@ -26,7 +26,10 @@ class InputArea extends JPanel implements UndoableEditListener {
 
 	private final UndoManager undo = new UndoManager();
 
+	private final TrainerModelInput input;
+
 	public InputArea(final TrainerModelInput input) {
+		this.input = input;
 		setLayout(new BorderLayout());
 		final JPanel pnlNorth = new JPanel(new BorderLayout());
 		((BorderLayout) pnlNorth.getLayout()).setHgap(10);
@@ -112,5 +115,13 @@ class InputArea extends JPanel implements UndoableEditListener {
 	@Override
 	public void undoableEditHappened(final UndoableEditEvent editEvent) {
 		undo.addEdit(editEvent.getEdit());
+	}
+
+	void applyLocaleFromInput() {
+		if (txtInput.getInputContext() != null) {
+			txtInput.getInputContext().selectInputMethod(input.getLocale());
+		} else {
+			System.err.println(String.format("InputContext for input %s is null.", input.getName()));
+		}
 	}
 }

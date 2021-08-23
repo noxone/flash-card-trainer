@@ -12,6 +12,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.util.Arrays;
+import java.util.List;
 
 import javax.swing.AbstractListModel;
 import javax.swing.Icon;
@@ -58,6 +59,7 @@ public class MainWindow extends JFrame {
 			try {
 				SwingUtilities.invokeAndWait(() -> {
 					window = new MainWindow(settings, model);
+					window.applyLocales();
 					window.setVisible(true);
 				});
 			} catch (final Exception e) {
@@ -97,7 +99,7 @@ public class MainWindow extends JFrame {
 	private JTable tblItems;
 	private JTextField txtItemFilter;
 	private JLabel lblItemFilterClear;
-	private InputArea[] inputAreas;
+	private List<InputArea> inputAreas;
 	private JButton btnAddData;
 	private JButton btnRemoveData;
 	private JButton btnMenu;
@@ -146,7 +148,7 @@ public class MainWindow extends JFrame {
 		tblItems = new JTable(new ListTableModel<>((AbstractListModel<TrainerItem>) getModel()));
 		txtItemFilter = new JTextField();
 		lblItemFilterClear = new JLabel(Icons.CLEAR.getImageIcon());
-		inputAreas = createInputAreas(getInputs());
+		inputAreas = Arrays.asList(createInputAreas(getInputs()));
 		btnAddData = new JButton(Messages.getString("MainWindow.Add"), Icons.BUTTON_ADD.getImageIcon()); //$NON-NLS-1$
 		btnRemoveData = new JButton(Messages.getString("MainWindow.Delete"), Icons.BUTTON_REMOVE.getImageIcon()); //$NON-NLS-1$
 		btnMenu = new JButton(Icons.ARROW_DOWN.getImageIcon());
@@ -165,7 +167,7 @@ public class MainWindow extends JFrame {
 		pnlLeftBottom.setLayout(new GridLayout(1, 2));
 		((GridLayout) pnlLeftBottom.getLayout()).setHgap(10);
 		pnlBottom.setLayout(new GridLayout(1, 3));
-		pnlRight.setLayout(new GridLayout(inputAreas.length, 1));
+		pnlRight.setLayout(new GridLayout(inputAreas.size(), 1));
 		tblItems.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		tblItems.setAutoCreateRowSorter(true);
 		tblItems.setFillsViewportHeight(true);
@@ -219,7 +221,7 @@ public class MainWindow extends JFrame {
 		// Handler
 		btnAddData.addActionListener(arg0 -> {
 			createEmptyItem();
-			inputAreas[0].requestFocus();
+			inputAreas.get(0).requestFocus();
 		});
 		btnRemoveData.addActionListener(event -> doRemoveSelectedItem());
 		btnMenu.addActionListener(event -> doShowMenu(btnMenu));
@@ -252,11 +254,10 @@ public class MainWindow extends JFrame {
 				updateTrainerItemFromUi();
 			}
 		};
-		for (int i = 0; i < inputAreas.length; ++i) {
-			final int index = i;
-			inputAreas[i].addDocumentListener(kartenSaver);
-			inputAreas[i].addActionListener(e -> {
-				getCurrentItem().setKnown(index, inputAreas[index].isChecked());
+		for (final InputArea inputArea : inputAreas) {
+			inputArea.addDocumentListener(kartenSaver);
+			inputArea.addActionListener(e -> {
+				getCurrentItem().setKnown(inputAreas.indexOf(inputArea), inputArea.isChecked());
 				tblItems.repaint();
 			});
 		}
@@ -281,7 +282,7 @@ public class MainWindow extends JFrame {
 
 	@SuppressWarnings("unchecked")
 	private void setModel(final TrainerModel<?> model) {
-		// TODO Listener h�bsch machen
+		// TODO Listener hübsch machen
 		if (model != null && model instanceof AbstractListModel) {
 			((AbstractListModel<?>) model).removeListDataListener(modelListener);
 		}
@@ -310,12 +311,16 @@ public class MainWindow extends JFrame {
 		}
 	}
 
+	private void applyLocales() {
+		inputAreas.forEach(InputArea::applyLocaleFromInput);
+	}
+
 	private TrainerModelInput[] getInputs() {
 		return TrainerModelProvider.getInstance().getInputs(getModel());
 	}
 
 	private void createEmptyItem() {
-		final String[] values = new String[inputAreas.length];
+		final String[] values = new String[inputAreas.size()];
 		Arrays.fill(values, "");
 		final int index = getModel().addItem(values);
 		setSelectedModelIndex(toListIndex(index));
@@ -323,8 +328,8 @@ public class MainWindow extends JFrame {
 
 	private void setValues(final TrainerItem item) {
 		for (int i = 0; i < item.getValues().length; ++i) {
-			inputAreas[i].setText(item.getValues()[i]);
-			inputAreas[i].setChecked(item.isKnown(i));
+			inputAreas.get(i).setText(item.getValues()[i]);
+			inputAreas.get(i).setChecked(item.isKnown(i));
 		}
 	}
 
@@ -339,8 +344,8 @@ public class MainWindow extends JFrame {
 		synchronized (listUpdate_mutex) {
 			if (!updatingList) {
 				final TrainerItem item = getCurrentItem();
-				for (int i = 0; i < inputAreas.length; ++i) {
-					item.setValue(i, inputAreas[i].getText());
+				for (int i = 0; i < inputAreas.size(); ++i) {
+					item.setValue(i, inputAreas.get(i).getText());
 				}
 				tblItems.repaint();
 			}

@@ -55,7 +55,7 @@ public abstract class Trainer<I extends TrainerItem, M extends TrainerModel<I>>
 		// Einstellungen laden
 		final Settings settings = new Settings();
 		try {
-			final Properties properties = createFinalApplicationProperties(getProperties());
+			final Properties properties = finalizeApplicationProperties(getProperties());
 			settings.load(properties);
 			initTrainerModelProvider(properties);
 		} catch (final Exception e) {
@@ -101,13 +101,13 @@ public abstract class Trainer<I extends TrainerItem, M extends TrainerModel<I>>
 		return null;
 	}
 
-	protected Properties createFinalApplicationProperties(final Properties properties) throws IOException {
-		final InputStream pis = getApplicationPropertiesInputStream();
-		if (pis != null) {
-			properties.load(pis);
-			pis.close();
+	protected Properties finalizeApplicationProperties(final Properties properties) throws IOException {
+		try (InputStream pis = getApplicationPropertiesInputStream()) {
+			if (pis != null) {
+				properties.load(pis);
+			}
+			return properties;
 		}
-		return properties;
 	}
 
 	protected void initTrainerModelProvider(final Properties properties) {
